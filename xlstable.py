@@ -40,6 +40,6 @@ class XLSTable:
 
         apply_border(ws, first_row, first_col, end_col=cur_col - 1)
         apply_outline(ws, first_row, first_col, end_col=cur_col - 1, border_style='medium')
-        font_setup(ws, first_row, first_col, end_col=cur_col - 1)
+        font_setup(ws, first_row, first_col, end_col=cur_col - 1, bold=True)
         alignment_setup(ws, first_row, first_col, end_col=cur_col - 1)
 

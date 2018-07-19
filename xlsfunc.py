@@ -50,46 +50,47 @@ def most_bottom_right_coords(start_row, start_col, end_row, end_col):
     return new_end_row, new_end_col
 
 def apply_border( ws, start_row, start_col, end_row=None, end_col=None, border_style='thin' ):
-    'https://openpyxl.readthedocs.io/en/stable/_modules/openpyxl/styles/borders.html'
-
-    new_end_row, new_end_col = most_bottom_right_coords(start_row, start_col, end_row, end_col)
+    """
+    """
+    end_row, end_col = most_bottom_right_coords(start_row, start_col, end_row, end_col)
     new_border = Border(left=Side(style=border_style),
                      right=Side(style=border_style),
                      top=Side(style=border_style),
                      bottom=Side(style=border_style))
 
-    for r in range( start_row, new_end_row + 1 ):
-        for c in range( start_col, new_end_col + 1 ):
+    for r in range( start_row, end_row + 1 ):
+        for c in range( start_col, end_col + 1 ):
             ws.cell( row=r, column=c ).border = new_border
 
 def apply_outline( ws, start_row, start_col, end_row=None, end_col=None, border_style='thin' ):
-    ''
+    """
+    """
     def apply_border( cl, side_name ):
-        border = copy(cl.border)
-        getattr(border, side_name).border_style = border_style
-        cl.border = border
+        new_border = copy(cl.border)
+        getattr(new_border, side_name).border_style = border_style
+        cl.border = new_border
 
-    new_end_row, new_end_col = most_bottom_right_coords(start_row, start_col, end_row, end_col)
+    end_row, end_col = most_bottom_right_coords(start_row, start_col, end_row, end_col)
 
-    for r in range( start_row, new_end_row + 1 ):
+    for r in range(start_row, end_row + 1):
         apply_border(ws.cell(row=r, column=start_col), 'left')
-        apply_border(ws.cell(row=r, column=new_end_col), 'right')
+        apply_border(ws.cell(row=r, column=end_col), 'right')
 
-    for c in range( start_col, new_end_col + 1 ):
+    for c in range(start_col, end_col + 1):
         apply_border(ws.cell(row=start_row, column=c), 'top')
-        apply_border(ws.cell(row=new_end_row, column=c), 'bottom')
+        apply_border(ws.cell(row=end_row, column=c), 'bottom')
 
 def font_setup(ws, start_row, start_col, end_row=None, end_col=None, \
             name='Calibri', size=11, bold=False, italic=False, underline='none', \
             vertAlign='baseline', strike=False, color='FF000000'):
     """https://openpyxl.readthedocs.io/en/2.5/styles.html
     """
-    new_end_row, new_end_col = most_bottom_right_coords(start_row, start_col, end_row, end_col)
+    end_row, end_col = most_bottom_right_coords(start_row, start_col, end_row, end_col)
     new_font = Font(name=name, size=size, bold=bold, italic=italic, underline=underline, \
                vertAlign=vertAlign, strike=strike, color=color)
 
-    for r in range(start_row, new_end_row + 1):
-        for c in range(start_col, new_end_col + 1):
+    for r in range(start_row, end_row + 1):
+        for c in range(start_col, end_col + 1):
             ws.cell(row=r, column=c).font = new_font
 
 def alignment_setup(ws, start_row, start_col, end_row=None, end_col=None, \
@@ -97,10 +98,10 @@ def alignment_setup(ws, start_row, start_col, end_row=None, end_col=None, \
             shrinkToFit=True):
     """https://openpyxl.readthedocs.io/en/2.5/_modules/openpyxl/styles/alignment.html
     """
-    new_end_row, new_end_col = most_bottom_right_coords(start_row, start_col, end_row, end_col)
+    end_row, end_col = most_bottom_right_coords(start_row, start_col, end_row, end_col)
     new_align = Alignment(horizontal=horizontal, vertical=vertical, textRotation=textRotation, \
                     wrapText=wrapText, shrinkToFit=shrinkToFit)
 
-    for r in range(start_row, new_end_row + 1):
-        for c in range(start_col, new_end_col + 1):
+    for r in range(start_row, end_row + 1):
+        for c in range(start_col, end_col + 1):
             ws.cell(row=r, column=c).alignment = new_align
