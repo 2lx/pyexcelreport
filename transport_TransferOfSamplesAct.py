@@ -2,14 +2,19 @@
 # -*- coding: utf-8 -*-
 
 from xlsreport import *
+from xlstable import *
 
-rep = XLSReport('Отчёт')
+rep = XLSReport('Акт передачи образцов')
 
-col_count = rep.make_tableheader_1line( headers=(\
+table = XLSTable( headers=(\
     [ 'Артикул' ], \
-    [ 'Цвет ШП/Global', 1 ], \
+    [ 'Цвет ШП/Global' ], \
     [ 'Размеры', 13 ], \
-    [ 'Номера коробок', 1 ] \
-    ), first_row=4, first_col=2 )
+    [ 'Номера коробок' ] \
+    ) )
+max_col = table.column_count()
+print(max_col)
+rep.apply_table(table, first_row=4)
 
-rep.launch_excel()
+print("OK")
+#  rep.launch_excel()
