@@ -2,13 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os
-import tempfile
 import copy
 
 from openpyxl import Workbook, worksheet
 from openpyxl.styles.borders import Border, Side
-
-import excelreport
 
 def workbook_create():
     wb = Workbook()
@@ -22,7 +19,7 @@ def sheet_create(wb, main_sheet_name):
 
     return ws
 
-def sheet_print_setup(ws, print_settings):
+def sheet_print_setup(ws, porientation, pwidth):
     'https://openpyxl.readthedocs.io/en/2.5/_modules/openpyxl/worksheet/page.html'
 
     ws.print_options.horizontalCentered = True
@@ -40,29 +37,10 @@ def sheet_print_setup(ws, print_settings):
     ws.sheet_properties.pageSetUpPr.fitToPage = True
     ws.page_setup.fitToHeight = False
 
-    if print_settings in [ excelreport.PrintSet.LandscapeW1, excelreport.PrintSet.LandscapeW2 ]:
-        worksheet.Worksheet.set_printer_settings(ws, paper_size = 1, orientation='landscape')
-
-    if print_settings in [ excelreport.PrintSet.PortraitW1 ]:
-        worksheet.Worksheet.set_printer_settings(ws, paper_size = 1, orientation='portrait')
-
-    if print_settings in [ excelreport.PrintSet.LandscapeW1, excelreport.PrintSet.PortraitW1 ]:
-        ws.page_setup.fitToWidth = 1
-
-    if print_settings in [ excelreport.PrintSet.LandscapeW2 ]:
+    worksheet.Worksheet.set_printer_settings(ws, paper_size = 1, orientation=porientation)
+    ws.page_setup.fitToWidth = pwidth
+    if pwidth == 2:
         ws.print_options.horizontalCentered = False
-        ws.page_setup.fitToWidth = 2
-
-def temporary_file(filename='sample'):
-    cnt = 1
-    while True:
-        newfilename = '{0:s}\\{1:s}{2:0>2d}.xlsx'.format( tempfile.gettempdir(), filename, cnt )
-        if os.path.isfile(newfilename):
-            cnt+=1
-        else:
-            break
-
-    return newfilename
 
 def apply_border( ws, start_row, start_column, end_row, end_column, border_style='thin' ):
     'https://openpyxl.readthedocs.io/en/stable/_modules/openpyxl/styles/borders.html'

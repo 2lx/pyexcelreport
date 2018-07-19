@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from excelreport import ExcelReport, XLSXColor, PrintSet
+from xlsreport import *
 
-rep = ExcelReport('Отчёт')
+rep = XLSReport('Отчёт')
 
 col_count = rep.make_tableheader_1line( headers=(\
     [ 'Артикул' ], \
