@@ -64,37 +64,20 @@ def apply_border( ws, start_row, start_col, end_row=None, end_col=None, border_s
 
 def apply_outline( ws, start_row, start_col, end_row=None, end_col=None, border_style='thin' ):
     ''
+    def apply_border( cl, side_name ):
+        border = copy(cl.border)
+        getattr(border, side_name).border_style = border_style
+        cl.border = border
+
     new_end_row, new_end_col = most_bottom_right_coords(start_row, start_col, end_row, end_col)
-    side = Side(border_style=border_style)
 
-    borderl = Border(left=side)
-    borderr = Border(right=side)
-    bordert = Border(top=side)
-    borderb = Border(bottom=side)
+    for r in range( start_row, new_end_row + 1 ):
+        apply_border(ws.cell(row=r, column=start_col), 'left')
+        apply_border(ws.cell(row=r, column=end_col), 'right')
 
-    cells = [ ws.cell( row=i, column=start_col ) for i in range( start_row, new_end_row + 1 ) ]
-    for cl in cells:
-        border = copy(cl.border)
-        border.left = side
-        cl.border = border
-
-    cells = [ ws.cell( row=i, column=new_end_col ) for i in range( start_row, new_end_row + 1 ) ]
-    for cl in cells:
-        border = copy(cl.border)
-        border.right = side
-        cl.border = border
-
-    cells = [ ws.cell( row=start_row, column=i ) for i in range( start_col, new_end_col + 1 ) ]
-    for cl in cells:
-        border = copy(cl.border)
-        border.top = side
-        cl.border = border
-
-    cells = [ ws.cell( row=new_end_row, column=i ) for i in range( start_col, new_end_col + 1 ) ]
-    for cl in cells:
-        border = copy(cl.border)
-        border.bottom = side
-        cl.border = border
+    for c in range( start_col, new_end_col + 1 ):
+        apply_border(ws.cell(row=start_row, column=c), 'top')
+        apply_border(ws.cell(row=end_row, column=c), 'bottom')
 
 def font_setup(ws, start_row, start_col, end_row=None, end_col=None, \
             name='Calibri', size=11, bold=False, italic=False, underline='none', \
