@@ -3,7 +3,6 @@
 
 import os
 import sys
-import subprocess
 import tempfile
 
 def is_exists_and_locked(filepath):
@@ -23,23 +22,23 @@ def is_exists_and_locked(filepath):
     except BaseException:
         return True
 
-def temporary_file( nametemplate='sample' ):
+def temporary_file(nametemplate='sample'):
     """Generates the unique name of file for given template
     in system user termporary directory'
     """
-    for cnt in range( 1, 100 ):
-        newfilename = '{0:s}{1:s}{2:s}{3:0>2d}.xlsx'.format( \
-                tempfile.gettempdir(), os.sep, nametemplate, cnt )
-        if not is_exists_and_locked( newfilename ):
+    for cnt in range(1, 100):
+        newfilename = '{0:s}{1:s}{2:s}{3:0>2d}.xlsx'.format(\
+                tempfile.gettempdir(), os.sep, nametemplate, cnt)
+        if not is_exists_and_locked(newfilename):
             break
 
     return newfilename
 
-def open_file( filename ):
+def open_file(filename):
     """Opens file in app which is associated with file's extension
     """
     if sys.platform == 'win32':
-        os.startfile( filename )
+        os.startfile(filename)
     else:
         opener = 'open' if sys.platform == 'darwin' else 'xdg-open'
-        os.system( "{0:s} {1:s} &".format( opener, filename ) )
+        os.system("{0:s} {1:s} &".format(opener, filename))
