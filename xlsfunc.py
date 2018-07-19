@@ -73,11 +73,11 @@ def apply_outline( ws, start_row, start_col, end_row=None, end_col=None, border_
 
     for r in range( start_row, new_end_row + 1 ):
         apply_border(ws.cell(row=r, column=start_col), 'left')
-        apply_border(ws.cell(row=r, column=end_col), 'right')
+        apply_border(ws.cell(row=r, column=new_end_col), 'right')
 
     for c in range( start_col, new_end_col + 1 ):
         apply_border(ws.cell(row=start_row, column=c), 'top')
-        apply_border(ws.cell(row=end_row, column=c), 'bottom')
+        apply_border(ws.cell(row=new_end_row, column=c), 'bottom')
 
 def font_setup(ws, start_row, start_col, end_row=None, end_col=None, \
             name='Calibri', size=11, bold=False, italic=False, underline='none', \

@@ -38,8 +38,8 @@ class XLSTable:
             ws.cell(row=first_row, column=cur_col).value = hdr.title
             cur_col += hdr.xlscolumns
 
-        apply_border(ws, first_row, first_col, first_row, cur_col - 1)
-        apply_outline(ws, first_row, first_col, first_row, cur_col - 1, 'medium')
-        font_setup(ws, first_row, first_col, first_row, cur_col - 1)
-        alignment_setup(ws, first_row, first_col, first_row, cur_col - 1)
+        apply_border(ws, first_row, first_col, end_col=cur_col - 1)
+        apply_outline(ws, first_row, first_col, end_col=cur_col - 1, border_style='medium')
+        font_setup(ws, first_row, first_col, end_col=cur_col - 1)
+        alignment_setup(ws, first_row, first_col, end_col=cur_col - 1)
 
