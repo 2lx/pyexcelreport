@@ -23,21 +23,21 @@ class XLSReport():
     """Класс, инкапсулирующий в себе методы для создания отчета в Excel
     """
 
-    def __init__( self, main_sheet_name='Новый лист', print_conf=PrintConf.LandscapeW1 ):
-        """Конструктор, принимает название страницы и параметры печати
+    def __init__(self, sheet_name='Новый лист', print_conf=PrintConf.LandscapeW1):
+        """Конструктор, создает книгу с одним именованным листом, устанавливает параметры для печати
         """
-        self.wb = workbook_create()
-        self.ws = sheet_create( self.wb, main_sheet_name )
-        sheet_print_setup( self.ws, print_conf.value[0], print_conf.value[1] )
+        self._wb = workbook_create()
+        self._ws = sheet_create(self._wb, sheet_name)
+        sheet_print_setup(self._ws, print_conf.value[0], print_conf.value[1])
 
-    def launch_excel(self, templatename='sample' ):
+    def launch_excel(self, templatename='sample'):
         """Запускает программу по умолчанию для xls-файлов и открывает в ней workbook
         """
-        newfilename = temporary_file( templatename )
-        self.wb.save( newfilename )
+        newfilename = temporary_file(templatename)
+        self._wb.save(newfilename)
 
-        print( "Opening file '{0:s}'...".format( newfilename ) )
-        open_file( newfilename )
+        print("Opening file '{0:s}'...".format(newfilename))
+        open_file(newfilename)
 
     def apply_table(self, table, first_row=1, first_col=1):
-        table.apply_header(self.wb.active, first_row, first_col)
+        table.apply_header(self._wb.active, first_row, first_col)
