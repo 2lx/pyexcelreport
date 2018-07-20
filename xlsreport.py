@@ -8,6 +8,7 @@ from enum import Enum
 from xlsutils import *
 from systemutils import *
 from xlsutils_apply import *
+from openpyxl.styles.protection import Protection
 
 class PrintConf(Enum):
     """Настройки печати
@@ -20,12 +21,14 @@ class XLSReport():
     """Класс, инкапсулирующий в себе методы для создания отчета в Excel
     """
 
-    def __init__(self, sheet_name='Новый лист', print_conf=PrintConf.LandscapeW1):
+    def __init__(self, sheet_name='Новый лист', print_conf=PrintConf.LandscapeW1, protection=True):
         """Конструктор, создает книгу с одним именованным листом, устанавливает параметры для печати
         """
         self._wb = workbook_create()
         self._ws = sheet_create(self._wb, sheet_name)
         sheet_print_setup(self._ws, print_conf.value[0], print_conf.value[1])
+        self.protection = protection
+        self._ws.protection.sheet = protection
 
 
     def launch_excel(self, templatename='sample'):

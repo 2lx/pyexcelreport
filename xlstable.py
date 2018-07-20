@@ -6,10 +6,11 @@ from xlsutils_apply import *
 class XLSTableColumnInfo:
     """Структура для хранения информации одного столбца данных таблицы
     """
-    def __init__(self, fieldname, type = 'string', columns=1):
+    def __init__(self, fieldname, type = 'string', columns=1, editable=False):
         self.fieldname  = fieldname
         self.columns    = columns
         self.type       = type
+        self.editable   = editable
 
 class XLSTable:
     """Класс, инкапсулирующий информацию и методы отображения данных таблицы
