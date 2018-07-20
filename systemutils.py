@@ -4,7 +4,6 @@
 import os
 import sys
 import tempfile
-import getpass
 
 def is_exists_and_locked(filepath):
     """Checks if a file is locked by opening it in append mode.
@@ -23,13 +22,13 @@ def is_exists_and_locked(filepath):
     except BaseException:
         return True
 
-def temporary_file(nametemplate='sample'):
+def temporary_file(filename_pattern='sample'):
     """Generates the unique name of file for given template
     in system user termporary directory'
     """
     for cnt in range(1, 100):
         newfilename = '{0:s}{1:s}{2:s}{3:0>2d}.xlsx'.format(\
-                tempfile.gettempdir(), os.sep, nametemplate, cnt)
+                tempfile.gettempdir(), os.sep, filename_pattern, cnt)
         if not is_exists_and_locked(newfilename):
             break
 
@@ -44,5 +43,3 @@ def open_file(filename):
         opener = 'open' if sys.platform == 'darwin' else 'xdg-open'
         os.system("{0:s} {1:s} &".format(opener, filename))
 
-def get_username():
-    return getpass.getuser()

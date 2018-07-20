@@ -43,16 +43,20 @@ class XLSReport():
         self._ws.merge_cells(start_row=1, start_column=1, \
                        end_row=1,   end_column=max_col)
 
-        self._ws.cell(row=1, column=1).value = "Пользователь: {0:s}. Логин: {1:s} Время: {2:s}"\
-                .format(get_username(), os.getlogin(), datetime.datetime.now().strftime("%A %d %B %Y %H:%M"))
+        self._ws.cell(row=1, column=1).value = "Пользователь: {0:s}. Время: {1:s}"\
+                .format(os.getlogin(), datetime.datetime.now().strftime("%A %d %B %Y %H:%M"))
         apply_range(self._ws, 1, 1, 1, max_col, set_font, size=9, italic=True)
         apply_range(self._ws, 1, 1, 1, max_col, set_alignment, horizontal='right', vertical='top')
+
+
+    def apply_label(self, label, first_row, first_col=1, col_count=1):
+        label.apply(self._wb.active, first_row, first_col, col_count)
 
 
     def apply_tableheader(self, tableheader, first_row, first_col=1):
         tableheader.apply(self._wb.active, first_row, first_col)
 
 
-    def apply_label(self, label, first_row, first_col=1, col_count=1):
-        label.apply(self._wb.active, first_row, first_col, col_count)
+    def apply_table(self, table, first_row, first_col=1):
+        table.apply(self._wb.active, first_row, first_col)
 
