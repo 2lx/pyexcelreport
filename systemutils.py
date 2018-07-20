@@ -4,6 +4,7 @@
 import os
 import sys
 import tempfile
+import getpass
 
 def is_exists_and_locked(filepath):
     """Checks if a file is locked by opening it in append mode.
@@ -42,3 +43,6 @@ def open_file(filename):
     else:
         opener = 'open' if sys.platform == 'darwin' else 'xdg-open'
         os.system("{0:s} {1:s} &".format(opener, filename))
+
+def get_username():
+    return getpass.getuser()

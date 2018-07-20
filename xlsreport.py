@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import datetime
 from enum import Enum
 
 from xlsutils import *
@@ -42,7 +43,8 @@ class XLSReport():
         self._ws.merge_cells(start_row=1, start_column=1, \
                        end_row=1,   end_column=max_col)
 
-        self._ws.cell(row=1, column=1).value = 'Пользователь: Время: '
+        self._ws.cell(row=1, column=1).value = "Пользователь: {0:s}. Логин: {1:s} Время: {2:s}"\
+                .format(get_username(), os.getlogin(), datetime.datetime.now().strftime("%A %d %B %Y %H:%M"))
         apply_range(self._ws, 1, 1, 1, max_col, set_font, size=9, italic=True)
         apply_range(self._ws, 1, 1, 1, max_col, set_alignment, horizontal='right', vertical='top')
 
