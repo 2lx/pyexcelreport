@@ -2,21 +2,21 @@
 # -*- coding: utf-8 -*-
 
 from xlsreport import *
-from xlstable import *
+from xlstableheader import *
 
-HDR=XLSTableHeader
+THC=XLSTableHeaderColumn
 
 rep = XLSReport('Акт передачи образцов')
 
-table = XLSTable( headers=(\
-    HDR( 'Артикул' ), \
-    HDR( 'Цвет ШП/Global' ), \
-    HDR( 'Размеры', 13 ), \
-    HDR( 'Номера коробок' ) \
+tableheader = XLSTableHeader( headers=(\
+    THC( 'Артикул' ), \
+    THC( 'Цвет ШП/Global' ), \
+    THC( 'Размеры', 13 ), \
+    THC( 'Номера коробок' ) \
     ) )
-max_col = table.column_count()
+max_col = tableheader.column_count()
 print(max_col)
-rep.apply_table(table, first_row=4)
+rep.apply_tableheader(tableheader, first_row=4)
 
 print("OK")
 rep.launch_excel()

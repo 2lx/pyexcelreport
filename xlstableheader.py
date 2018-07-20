@@ -1,20 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from xlsfunc import *
+from xlsutils import *
 
-class XLSTableHeader:
-    """Структура для хранения информации заголовка столбца таблицы
+class XLSTableHeaderColumn:
+    """Структура для хранения информации одного столбца (ячейки) шапки таблицы
     """
     def __init__(self, title, xlscolumns=1):
         self.title=title
         self.xlscolumns=xlscolumns
 
-
-class XLSTable:
-    """Класс, автоматизирующий создание таблицы на листе книги XLS
+class XLSTableHeader:
+    """Класс, инкапсулирующий информацию и методы отображения шапки таблицы
     """
-
     def __init__(self, headers):
         self._data = headers
         self._col_count = sum(hdr.xlscolumns for hdr in headers)
@@ -24,8 +22,8 @@ class XLSTable:
         """
         return self._col_count
 
-    def apply_header(self, ws, first_row, first_col):
-        """Отображает в XLS шапку таблицы
+    def apply(self, ws, first_row, first_col):
+        """Отображает непосредственно в XLS шапку таблицы
         """
         ws.row_dimensions[first_row].height = 50
 
@@ -38,8 +36,8 @@ class XLSTable:
             ws.cell(row=first_row, column=cur_col).value = hdr.title
             cur_col += hdr.xlscolumns
 
-        apply_border(ws, first_row, first_col, end_col=cur_col - 1)
-        apply_outline(ws, first_row, first_col, end_col=cur_col - 1, border_style='medium')
-        font_setup(ws, first_row, first_col, end_col=cur_col - 1, bold=True)
-        alignment_setup(ws, first_row, first_col, end_col=cur_col - 1)
+        apply_border(   ws, first_row, first_col, end_col=cur_col - 1)
+        apply_outline(  ws, first_row, first_col, end_col=cur_col - 1, border_style='medium')
+        apply_font(     ws, first_row, first_col, end_col=cur_col - 1, bold=True)
+        apply_alignment(ws, first_row, first_col, end_col=cur_col - 1)
 

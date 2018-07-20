@@ -4,8 +4,8 @@
 import os
 from enum import Enum
 
-from xlsfunc import *
-from difffunc import *
+from xlsutils import *
+from systemutils import *
 
 class PrintConf(Enum):
     """Настройки печати
@@ -39,5 +39,5 @@ class XLSReport():
         print("Opening file '{0:s}'...".format(newfilename))
         open_file(newfilename)
 
-    def apply_table(self, table, first_row=1, first_col=1):
-        table.apply_header(self._wb.active, first_row, first_col)
+    def apply_tableheader(self, tableheader, first_row=1, first_col=1):
+        tableheader.apply(self._wb.active, first_row, first_col)

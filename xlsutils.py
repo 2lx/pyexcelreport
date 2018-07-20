@@ -66,6 +66,8 @@ def apply_outline( ws, start_row, start_col, end_row=None, end_col=None, border_
     """
     """
     def apply_border( cl, side_name ):
+        """Применяет обводку к одной стороне одной ячейки
+        """
         new_border = copy(cl.border)
         getattr(new_border, side_name).border_style = border_style
         cl.border = new_border
@@ -80,7 +82,7 @@ def apply_outline( ws, start_row, start_col, end_row=None, end_col=None, border_
         apply_border(ws.cell(row=start_row, column=c), 'top')
         apply_border(ws.cell(row=end_row, column=c), 'bottom')
 
-def font_setup(ws, start_row, start_col, end_row=None, end_col=None, \
+def apply_font(ws, start_row, start_col, end_row=None, end_col=None, \
             name='Calibri', size=11, bold=False, italic=False, underline='none', \
             vertAlign='baseline', strike=False, color='FF000000'):
     """https://openpyxl.readthedocs.io/en/2.5/styles.html
@@ -93,7 +95,7 @@ def font_setup(ws, start_row, start_col, end_row=None, end_col=None, \
         for c in range(start_col, end_col + 1):
             ws.cell(row=r, column=c).font = new_font
 
-def alignment_setup(ws, start_row, start_col, end_row=None, end_col=None, \
+def apply_alignment(ws, start_row, start_col, end_row=None, end_col=None, \
             horizontal='center', vertical='center', textRotation=None, wrapText=True, \
             shrinkToFit=True):
     """https://openpyxl.readthedocs.io/en/2.5/_modules/openpyxl/styles/alignment.html
