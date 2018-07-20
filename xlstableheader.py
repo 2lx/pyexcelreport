@@ -39,7 +39,8 @@ class XLSTableHeader:
             ws.cell(row=first_row, column=cur_col).value = hdr.title
             cur_col += hdr.xlscolumns
 
-        range = CellRange(min_row=first_row, min_col=first_col, max_row=first_row, max_col=cur_col - 1)
+        range = CellRange(min_row=first_row, min_col=first_col, \
+                          max_row=first_row, max_col=cur_col - 1)
         apply_xlrange(ws, range, set_borders)
         apply_xlrange(ws, range, set_outline, border_style='medium')
         apply_xlrange(ws, range, set_font, bold=True)
