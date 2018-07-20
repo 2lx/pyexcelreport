@@ -63,3 +63,4 @@ class XLSTable:
         apply_xlrange(ws, range, set_outline, border_style='medium')
         apply_xlrange(ws, range, set_font)
 
+        return cur_row

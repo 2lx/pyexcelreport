@@ -14,16 +14,17 @@ rep = XLSReport('Акт передачи образцов')
 tableheader = XLSTableHeader( headers=(\
     THC( 'Артикул',         width=20 ), \
     THC( 'Цвет ШП/Global',  width=20 ), \
-    THC( 'Размеры',                     count=13 ), \
+    THC( 'Размеры',         struct=[\
+        THC( title='размер', width=7 ) ]*13 \
+        ), \
     THC( 'Номера коробок',  width=20 ) \
     ) )
 max_col = tableheader.column_count()
 print(max_col)
 
-rep.apply_preamble(max_col)
-rep.apply_label(XLSLabel('Прибыла ТЕ такого то числа', 1), first_row=2, col_count=max_col)
-rep.apply_tableheader(tableheader, first_row=4)
-#  rep.apply_tableheader(tableheader, first_row=6)
+cur_row = rep.apply_preamble(max_col)
+cur_row = rep.apply_label(XLSLabel('Прибыла ТЕ такого то числа', 1), first_row=cur_row, col_count=max_col)
+cur_row = rep.apply_tableheader(tableheader, first_row=cur_row)
 
 table_info = (\
     TCI('field1',  'string', 1), \
@@ -55,7 +56,7 @@ table_data = ( \
 
 table = XLSTable(table_info, table_data )
 
-rep.apply_table(table, first_row=5)
+cur_row = rep.apply_table(table, first_row=cur_row)
 
 rep.launch_excel()
 print("OK")

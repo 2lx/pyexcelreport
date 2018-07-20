@@ -9,20 +9,44 @@ from openpyxl.utils import get_column_letter
 class XLSTableHeaderColumn:
     """Структура для хранения информации одного столбца (ячейки) шапки таблицы
     """
-    def __init__(self, title, count=1, width=None, struct=[]):
+    def __init__(self, title='', width=None, struct=[]):
         self.title = title
         self._struct = struct
+        self.width = width if not struct else None
+        self.count = self._struct_leaves_count()
+        self.height = self._struct_height()
+        self.visible_height = self._struct_visible_height()
 
-        self.count = count
-        self.width = width if count == 1 and len(struct) == 0 else None
+    def _struct_leaves_count(self):
+        """Подсчитывает количество колонок во всей структуре.
+        Каждая вложенная структура уже посчитала свой count при инициализации.
+        Внешние структуры инициализируются последними
+        """
+        return 1 if not self._struct else sum([thc.count for thc in self._struct])
+
+    def _struct_height(self):
+        """Подсчитывает глубину шапки
+        """
+        return 1 if not self._struct else 1 + max([thc.height for thc in self._struct])
+
+    def _struct_visible_height(self):
+        """Подсчитывает глубину видимой части шапки (колонки должны иметь title != '')
+        """
+        base_cnt = 1 if self.title != '' else 0
+        if not self._struct:
+            return base_cnt
+        else:
+            return base_cnt + max([thc.visible_height for thc in self._struct if thc.title != ''], default=0)
+
 
 class XLSTableHeader:
     """Класс, инкапсулирующий информацию и методы отображения шапки таблицы
     """
     def __init__(self, headers, bgcolor=Color.LT_GRAY.value):
-        self._data = headers
+        self._columns = headers
         self._bgcolor = bgcolor
         self._col_count = sum(hdr.count for hdr in headers)
+        self._height = max([hdr.visible_height for hdr in headers], default = 0)
 
     def column_count(self):
         """Возвращает количество физических столбцов в таблице
@@ -32,25 +56,29 @@ class XLSTableHeader:
     def apply(self, ws, first_row, first_col):
         """Отображает непосредственно в XLS шапку таблицы
         """
-        ws.row_dimensions[first_row].height = 50
+        ws.row_dimensions[first_row].height = 50 if self._height == 1 else 24
+        for i in range(1, self._height):
+            ws.row_dimensions[first_row + i].height = 32
 
         cur_col = first_col
-        for hdr in self._data:
-            if hdr.count > 1:
+        for thc in self._columns:
+            if thc.count > 1:
                 ws.merge_cells(start_row=first_row, start_column=cur_col, \
-                               end_row=first_row,   end_column=cur_col + hdr.count - 1)
+                               end_row=first_row,   end_column=cur_col + thc.count - 1)
+            else: ws.merge_cells(start_row=first_row, start_column=cur_col, \
+                                 end_row=first_row + self._height - 1, end_column=cur_col)
+            if not thc.width is None:
+                ws.column_dimensions[get_column_letter(cur_col)].width = thc.width
 
-            if not hdr.width is None:
-                ws.column_dimensions[get_column_letter(cur_col)].width = hdr.width
+            ws.cell(row=first_row, column=cur_col).value = thc.title
+            cur_col += thc.count
 
-            ws.cell(row=first_row, column=cur_col).value = hdr.title
-            cur_col += hdr.count
+        cr = CellRange(min_row=first_row, min_col=first_col, \
+                          max_row=first_row + self._height - 1, max_col=cur_col - 1)
+        apply_xlrange(ws, cr, set_borders)
+        apply_xlrange(ws, cr, set_outline, border_style='medium')
+        apply_xlrange(ws, cr, set_font, bold=True)
+        apply_xlrange(ws, cr, set_alignment)
+        apply_xlrange(ws, cr, set_fill, color=self._bgcolor)
 
-        range = CellRange(min_row=first_row, min_col=first_col, \
-                          max_row=first_row, max_col=cur_col - 1)
-        apply_xlrange(ws, range, set_borders)
-        apply_xlrange(ws, range, set_outline, border_style='medium')
-        apply_xlrange(ws, range, set_font, bold=True)
-        apply_xlrange(ws, range, set_alignment)
-        apply_xlrange(ws, range, set_fill, color=self._bgcolor)
-
+        return first_row + self._height
