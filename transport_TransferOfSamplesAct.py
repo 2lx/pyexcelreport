@@ -12,10 +12,10 @@ TCI=XLSTableColumnInfo
 rep = XLSReport('Акт передачи образцов')
 
 tableheader = XLSTableHeader( headers=(\
-    THC( 'Артикул', width=20 ), \
-    THC( 'Цвет ШП/Global', width=20 ), \
-    THC( 'Размеры', count=13 ), \
-    THC( 'Номера коробок', width=20 ) \
+    THC( 'Артикул',         width=20 ), \
+    THC( 'Цвет ШП/Global',  width=20 ), \
+    THC( 'Размеры',                     count=13 ), \
+    THC( 'Номера коробок',  width=20 ) \
     ) )
 max_col = tableheader.column_count()
 print(max_col)

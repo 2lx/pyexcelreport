@@ -6,9 +6,10 @@ from xlsutils_apply import *
 class XLSTableColumnInfo:
     """Структура для хранения информации одного столбца данных таблицы
     """
-    def __init__(self, fieldname, type = 'string', xlscolumns=1):
+    def __init__(self, fieldname, type = 'string', columns=1):
         self.fieldname  = fieldname
-        self.xlscolumns = xlscolumns
+        self.columns    = columns
+        self.type       = type
 
 class XLSTable:
     """Класс, инкапсулирующий информацию и методы отображения данных таблицы
@@ -16,7 +17,7 @@ class XLSTable:
     def __init__(self, colinfo, data):
         self._colinfo = colinfo
         self._data = data
-        self._col_count = sum(hdr.xlscolumns for hdr in colinfo)
+        self._col_count = sum(hdr.columns for hdr in colinfo)
         self._row_count = len(data)
 
     def column_count(self):
@@ -34,19 +35,30 @@ class XLSTable:
             cur_col = first_col
             col_index = 0
             for coli in self._colinfo:
-                if coli.xlscolumns > 1:
+                if coli.columns > 1:
                     ws.merge_cells(start_row=cur_row, start_column=cur_col, \
-                                   end_row=cur_row,   end_column=cur_col + coli.xlscolumns - 1)
+                                   end_row=cur_row,   end_column=cur_col + coli.columns - 1)
 
                 ws.cell(row=cur_row, column=cur_col).value = row[col_index]
-                cur_col += coli.xlscolumns
+                cur_col += coli.columns
                 col_index += 1
             cur_row += 1
+
+        cur_col = first_col
+        for coli in self._colinfo:
+            if coli.type in ['int', 'currency', '3digit']:
+                apply_range(ws, first_row, cur_col, cur_row -1, cur_col, \
+                        set_alignment, horizontal='right')
+                apply_range(ws, first_row, cur_col, cur_row -1, cur_col, \
+                        set_format, format=coli.type)
+            else:
+                apply_range(ws, first_row, cur_col, cur_row -1, cur_col, set_alignment)
+
+            cur_col += coli.columns
 
         range = CellRange(min_row=first_row, min_col=first_col, \
                           max_row=cur_row - 1, max_col=cur_col - 1)
         apply_xlrange(ws, range, set_borders)
         apply_xlrange(ws, range, set_outline, border_style='medium')
         apply_xlrange(ws, range, set_font)
-        apply_xlrange(ws, range, set_alignment)
 

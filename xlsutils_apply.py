@@ -85,3 +85,16 @@ def set_fill(ws, start_row, start_col, end_row, end_col, \
         for c in range(start_col, end_col + 1):
             ws.cell(row=r, column=c).fill = new_fill
 
+def set_format(ws, start_row, start_col, end_row, end_col, \
+            format=''):
+    """
+    """
+    if format == 'int':         new_format = '0'
+    elif format == 'currency':  new_format = '0.00'
+    elif format == '3digit':    new_format = '0.000'
+    else: return
+
+    for r in range(start_row, end_row + 1):
+        for c in range(start_col, end_col + 1):
+            ws.cell(row=r, column=c).number_format = new_format
+
