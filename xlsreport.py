@@ -14,11 +14,6 @@ class PrintConf(Enum):
     LandscapeW1 = ('landscape', 1)
     LandscapeW2 = ('landscape', 2)
 
-class XLSColor(Enum):
-    """Цвета в отчёте
-    """
-    lGray = 0xCCCCCC
-
 class XLSReport():
     """Класс, инкапсулирующий в себе методы для создания отчета в Excel
     """

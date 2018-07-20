@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from xlsutils import *
+from xlscolor import *
 
 class XLSTableHeaderColumn:
     """Структура для хранения информации одного столбца (ячейки) шапки таблицы
@@ -13,8 +14,9 @@ class XLSTableHeaderColumn:
 class XLSTableHeader:
     """Класс, инкапсулирующий информацию и методы отображения шапки таблицы
     """
-    def __init__(self, headers):
+    def __init__(self, headers, bgcolor=Color.LT_GRAY.value):
         self._data = headers
+        self._bgcolor = bgcolor
         self._col_count = sum(hdr.xlscolumns for hdr in headers)
 
     def column_count(self):
@@ -40,4 +42,5 @@ class XLSTableHeader:
         apply_outline(  ws, first_row, first_col, end_col=cur_col - 1, border_style='medium')
         apply_font(     ws, first_row, first_col, end_col=cur_col - 1, bold=True)
         apply_alignment(ws, first_row, first_col, end_col=cur_col - 1)
+        apply_fill(     ws, first_row, first_col, end_col=cur_col - 1, color=self._bgcolor)
 

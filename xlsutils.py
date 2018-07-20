@@ -6,7 +6,7 @@ from copy import copy
 
 from openpyxl import Workbook, worksheet
 from openpyxl.styles.borders import Border, Side
-from openpyxl.styles import Font, Color, Alignment
+from openpyxl.styles import Font, Color, Alignment, PatternFill
 
 def workbook_create():
     wb = Workbook()
@@ -107,3 +107,15 @@ def apply_alignment(ws, start_row, start_col, end_row=None, end_col=None, \
     for r in range(start_row, end_row + 1):
         for c in range(start_col, end_col + 1):
             ws.cell(row=r, column=c).alignment = new_align
+
+def apply_fill(ws, start_row, start_col, end_row=None, end_col=None, \
+            color='FFFFFF', fill_type='solid'):
+    """Fills the cell background with color
+    """
+    end_row, end_col = most_bottom_right_coords(start_row, start_col, end_row, end_col)
+    new_fill = PatternFill(start_color=color, end_color=color, fill_type=fill_type)
+
+    for r in range(start_row, end_row + 1):
+        for c in range(start_col, end_col + 1):
+            ws.cell(row=r, column=c).fill = new_fill
+
