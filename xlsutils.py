@@ -54,9 +54,9 @@ def apply_border( ws, start_row, start_col, end_row=None, end_col=None, border_s
     """
     end_row, end_col = most_bottom_right_coords(start_row, start_col, end_row, end_col)
     new_border = Border(left=Side(style=border_style),
-                     right=Side(style=border_style),
-                     top=Side(style=border_style),
-                     bottom=Side(style=border_style))
+                        right=Side(style=border_style),
+                        top=Side(style=border_style),
+                        bottom=Side(style=border_style))
 
     for r in range( start_row, end_row + 1 ):
         for c in range( start_col, end_col + 1 ):
@@ -65,8 +65,8 @@ def apply_border( ws, start_row, start_col, end_row=None, end_col=None, border_s
 def apply_outline( ws, start_row, start_col, end_row=None, end_col=None, border_style='thin' ):
     """
     """
-    def apply_border( cl, side_name ):
-        """Применяет обводку к одной стороне одной ячейки
+    def _apply_border( cl, side_name ):
+        """Apply outline to the one cell
         """
         new_border = copy(cl.border)
         getattr(new_border, side_name).border_style = border_style
@@ -75,12 +75,14 @@ def apply_outline( ws, start_row, start_col, end_row=None, end_col=None, border_
     end_row, end_col = most_bottom_right_coords(start_row, start_col, end_row, end_col)
 
     for r in range(start_row, end_row + 1):
-        apply_border(ws.cell(row=r, column=start_col), 'left')
-        apply_border(ws.cell(row=r, column=end_col), 'right')
+        for c in range(start_col, end_col + 1):
+            if (c not in [start_col, end_col]) and (r not in [start_row, end_row]):
+                continue
 
-    for c in range(start_col, end_col + 1):
-        apply_border(ws.cell(row=start_row, column=c), 'top')
-        apply_border(ws.cell(row=end_row, column=c), 'bottom')
+            if c == start_col: _apply_border(ws.cell(row=r, column=start_col), 'left')
+            if c == end_col:   _apply_border(ws.cell(row=r, column=end_col), 'right')
+            if r == start_row: _apply_border(ws.cell(row=start_row, column=c), 'top')
+            if r == end_row:   _apply_border(ws.cell(row=end_row, column=c), 'bottom')
 
 def apply_font(ws, start_row, start_col, end_row=None, end_col=None, \
             name='Calibri', size=11, bold=False, italic=False, underline='none', \

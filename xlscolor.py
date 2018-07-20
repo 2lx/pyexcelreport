@@ -4,9 +4,9 @@
 from enum import Enum
 
 class Color(Enum):
+    LT_GRAY         = 'DFDFDF'
     WHITE           = 'FFFFFF'
     BLACK           = '000000'
-    LT_GRAY         = 'DFDFDF'
 
     RED             = 'FDBDC1'
     ORANGE          = 'FED5B4'
