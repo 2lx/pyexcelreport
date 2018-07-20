@@ -16,7 +16,9 @@ tableheader = XLSTableHeader( headers=(\
     ) )
 max_col = tableheader.column_count()
 print(max_col)
+
 rep.apply_tableheader(tableheader, first_row=4)
+rep.apply_tableheader(tableheader, first_row=6)
 
 print("OK")
 rep.launch_excel()

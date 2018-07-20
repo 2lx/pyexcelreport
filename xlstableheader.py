@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from xlsutils import *
+from xlsutils_apply import *
 from xlscolor import *
 
 class XLSTableHeaderColumn:
@@ -38,9 +39,10 @@ class XLSTableHeader:
             ws.cell(row=first_row, column=cur_col).value = hdr.title
             cur_col += hdr.xlscolumns
 
-        apply_border(   ws, first_row, first_col, end_col=cur_col - 1)
-        apply_outline(  ws, first_row, first_col, end_col=cur_col - 1, border_style='medium')
-        apply_font(     ws, first_row, first_col, end_col=cur_col - 1, bold=True)
-        apply_alignment(ws, first_row, first_col, end_col=cur_col - 1)
-        apply_fill(     ws, first_row, first_col, end_col=cur_col - 1, color=self._bgcolor)
+        range = CellRange(min_row=first_row, min_col=first_col, max_row=first_row, max_col=cur_col - 1)
+        apply_xlrange(ws, range, set_borders)
+        apply_xlrange(ws, range, set_outline, border_style='medium')
+        apply_xlrange(ws, range, set_font, bold=True)
+        apply_xlrange(ws, range, set_alignment)
+        apply_xlrange(ws, range, set_fill, color=self._bgcolor)
 
