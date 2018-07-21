@@ -57,10 +57,9 @@ class XLSTable:
 
             cur_col += coli.columns
 
-        range = CellRange(min_row=first_row, min_col=first_col, \
-                          max_row=cur_row - 1, max_col=cur_col - 1)
-        apply_xlrange(ws, range, set_borders)
-        apply_xlrange(ws, range, set_outline, border_style='medium')
-        apply_xlrange(ws, range, set_font)
+        cr = get_xlrange(first_row, first_col, cur_row - 1, cur_col - 1)
+        apply_xlrange(ws, cr, set_borders)
+        apply_xlrange(ws, cr, set_outline, border_style='medium')
+        apply_xlrange(ws, cr, set_font)
 
         return cur_row

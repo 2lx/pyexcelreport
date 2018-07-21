@@ -15,6 +15,17 @@ def apply_range(ws, start_row, start_col, end_row, end_col, f, *args, **kwargs):
     if end_col < start_col: end_col, start_col = start_col, end_col
     f(ws, start_row, start_col, end_row, end_col, **kwargs)
 
+def get_xlrange(start_row, start_col, end_row=None, end_col=None):
+    if end_row is None: end_row = start_row
+    if end_col is None: end_col = start_col
+    if end_row < start_row:
+        start_row, end_row = end_row, start_row
+    if end_col < start_col:
+        start_col, end_col = end_col, start_col
+
+    return CellRange(min_row=start_row, min_col=start_col,
+                     max_row=end_row,   max_col=end_col)
+
 def apply_xlrange(ws, range, f, *args, **kwargs):
     f(ws, range.min_row, range.min_col, range.max_row, range.max_col, **kwargs)
 

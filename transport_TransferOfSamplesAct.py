@@ -46,7 +46,7 @@ table_info = (\
     TCI('',      'string', 1),
     )
 
-sqlprocedure = "dbo.OMS_TRANSPORT_ReportPackageGlobalInvoiceList"
+sqlprocedure = "ORDERS.dbo.OMS_TRANSPORT_ReportPackageGlobalInvoiceList"
 sqlparamlist = ( "'{53DAD87F-8C0F-4178-9A27-9F686E44A8FD}'", )
 sqlquery = "EXEC {0:s} {1:s}".format(sqlprocedure, ", ".join(sqlparamlist))
 

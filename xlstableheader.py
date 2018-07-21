@@ -73,8 +73,8 @@ class XLSTableHeader:
             ws.cell(row=first_row, column=cur_col).value = thc.title
             cur_col += thc.count
 
-        cr = CellRange(min_row=first_row, min_col=first_col, \
-                          max_row=first_row + self._height - 1, max_col=cur_col - 1)
+        cr = get_xlrange(first_row,                    first_col,
+                         first_row + self._height - 1, cur_col - 1)
         apply_xlrange(ws, cr, set_borders)
         apply_xlrange(ws, cr, set_outline, border_style='medium')
         apply_xlrange(ws, cr, set_font, bold=True)
