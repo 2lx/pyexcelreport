@@ -15,7 +15,7 @@ class XLSTableHeaderColumn:
         self.width = width if not struct else None
         self.count = self._struct_leaves_count()
         self.height = self._struct_height()
-        self.visible_height = self._struct_visible_height()
+        self.titled_height = self._struct_titled_height()
 
     def _struct_leaves_count(self):
         """Подсчитывает количество колонок во всей структуре.
@@ -29,14 +29,13 @@ class XLSTableHeaderColumn:
         """
         return 1 if not self._struct else 1 + max([thc.height for thc in self._struct])
 
-    def _struct_visible_height(self):
+    def _struct_titled_height(self):
         """Подсчитывает глубину видимой части шапки (колонки должны иметь title != '')
         """
-        base_cnt = 1 if self.title != '' else 0
-        if not self._struct:
-            return base_cnt
-        else:
-            return base_cnt + max([thc.visible_height for thc in self._struct if thc.title != ''], default=0)
+        cnt = 1 if self.title != '' else 0
+        if self._struct:
+            return cnt + max([thc.titled_height for thc in self._struct if thc.title != ''], default=0)
+        else: return cnt
 
 
 class XLSTableHeader:
@@ -46,12 +45,17 @@ class XLSTableHeader:
         self._columns = headers
         self._bgcolor = bgcolor
         self._col_count = sum(hdr.count for hdr in headers)
-        self._height = max([hdr.visible_height for hdr in headers], default = 0)
+        self._height = max([hdr.titled_height for hdr in headers], default = 0)
 
     def column_count(self):
         """Возвращает количество физических столбцов в таблице
         """
         return self._col_count
+
+    def apply_widths(self, ws):
+        """Применяет информацию о ширине столбцов из заголовка таблицы непосредственно к листу
+        """
+        pass
 
     def apply(self, ws, first_row, first_col):
         """Отображает непосредственно в XLS шапку таблицы
@@ -63,9 +67,9 @@ class XLSTableHeader:
         cur_col = first_col
         for thc in self._columns:
             if thc.count > 1:
-                ws.merge_cells(start_row=first_row, start_column=cur_col, \
+                ws.merge_cells(start_row=first_row, start_column=cur_col,
                                end_row=first_row,   end_column=cur_col + thc.count - 1)
-            else: ws.merge_cells(start_row=first_row, start_column=cur_col, \
+            else: ws.merge_cells(start_row=first_row, start_column=cur_col,
                                  end_row=first_row + self._height - 1, end_column=cur_col)
             if not thc.width is None:
                 ws.column_dimensions[get_column_letter(cur_col)].width = thc.width

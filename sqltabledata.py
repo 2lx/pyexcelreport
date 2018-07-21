@@ -4,7 +4,6 @@
 from xlstable import *
 import re
 import datetime
-
 import sys
 
 
@@ -12,6 +11,7 @@ def maybe_sqlquoted(param):
     """Возвращает переданный параметр окруженный кавычками (если это необходимо в SQL)
     """
     UUID_PATTERN = re.compile(r'^[{]?([\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12})[}]?$', re.IGNORECASE)
+
     matched = UUID_PATTERN.match(param)
     if matched:
         param = "'{{{0:s}}}'".format(matched.group(1))
@@ -23,9 +23,12 @@ def maybe_sqlquoted(param):
 
 
 if sys.platform.startswith('win'):
-    import config
     import pymssql
+    import config
+
     def get_mssql_data(sqlquery, table_info):
+        """
+        """
         conn = pymssql.connect( server=config.mssql_server,
                                 user=config.db_login,
                                 password=config.db_password,

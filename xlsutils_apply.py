@@ -58,31 +58,31 @@ def set_outline(ws, start_row, start_col, end_row, end_col, border_style='thin')
         _apply_border(ws.cell(row=start_row, column=c), 'top')
         _apply_border(ws.cell(row=end_row, column=c), 'bottom')
 
-def set_font(ws, start_row, start_col, end_row, end_col, \
-            name='Calibri', size=11, bold=False, italic=False, underline='none', \
-            vertAlign='baseline', strike=False, color='FF000000'):
+def set_font(ws, start_row, start_col, end_row, end_col,
+             name='Calibri', size=11, bold=False, italic=False, underline='none',
+             vertAlign='baseline', strike=False, color='FF000000'):
     """https://openpyxl.readthedocs.io/en/2.5/styles.html
     """
-    new_font = Font(name=name, size=size, bold=bold, italic=italic, underline=underline, \
-               vertAlign=vertAlign, strike=strike, color=color)
+    new_font = Font(name=name, size=size, bold=bold, italic=italic, underline=underline,
+                    vertAlign=vertAlign, strike=strike, color=color)
 
     for r in range(start_row, end_row + 1):
         for c in range(start_col, end_col + 1):
             ws.cell(row=r, column=c).font = new_font
 
-def set_alignment(ws, start_row, start_col, end_row, end_col, \
-            horizontal='center', vertical='center', textRotation=None, wrapText=True, \
-            shrinkToFit=True):
+def set_alignment(ws, start_row, start_col, end_row, end_col,
+                  horizontal='center', vertical='center', textRotation=None, wrapText=True,
+                  shrinkToFit=True):
     """https://openpyxl.readthedocs.io/en/2.5/_modules/openpyxl/styles/alignment.html
     """
-    new_align = Alignment(horizontal=horizontal, vertical=vertical, textRotation=textRotation, \
+    new_align = Alignment(horizontal=horizontal, vertical=vertical, textRotation=textRotation,
                     wrapText=wrapText, shrinkToFit=shrinkToFit)
 
     for r in range(start_row, end_row + 1):
         for c in range(start_col, end_col + 1):
             ws.cell(row=r, column=c).alignment = new_align
 
-def set_fill(ws, start_row, start_col, end_row, end_col, \
+def set_fill(ws, start_row, start_col, end_row, end_col,
             color='FFFFFF', fill_type='solid'):
     """Fills the cell background with color
     """
@@ -92,7 +92,7 @@ def set_fill(ws, start_row, start_col, end_row, end_col, \
         for c in range(start_col, end_col + 1):
             ws.cell(row=r, column=c).fill = new_fill
 
-def set_format(ws, start_row, start_col, end_row, end_col, \
+def set_format(ws, start_row, start_col, end_row, end_col,
             format=''):
     """
     """

@@ -37,7 +37,7 @@ class XLSTable:
             col_index = 0
             for coli in self._colinfo:
                 if coli.columns > 1:
-                    ws.merge_cells(start_row=cur_row, start_column=cur_col, \
+                    ws.merge_cells(start_row=cur_row, start_column=cur_col,
                                    end_row=cur_row,   end_column=cur_col + coli.columns - 1)
 
                 ws.cell(row=cur_row, column=cur_col).value = row[col_index]
@@ -48,13 +48,12 @@ class XLSTable:
         cur_col = first_col
         for coli in self._colinfo:
             if coli.type in ['int', 'currency', '3digit']:
-                apply_range(ws, first_row, cur_col, cur_row -1, cur_col, \
+                apply_range(ws, first_row, cur_col, cur_row -1, cur_col,
                         set_alignment, horizontal='right')
-                apply_range(ws, first_row, cur_col, cur_row -1, cur_col, \
+                apply_range(ws, first_row, cur_col, cur_row -1, cur_col,
                         set_format, format=coli.type)
             else:
                 apply_range(ws, first_row, cur_col, cur_row -1, cur_col, set_alignment)
-
             cur_col += coli.columns
 
         cr = get_xlrange(first_row, first_col, cur_row - 1, cur_col - 1)

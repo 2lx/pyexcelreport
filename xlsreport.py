@@ -11,7 +11,7 @@ from xlsutils_apply import *
 from openpyxl.styles.protection import Protection
 
 class PrintConf(Enum):
-    """Настройки печати
+    """Параметры печати печати
     """
     PortraitW1  = ('portrait',  1)
     LandscapeW1 = ('landscape', 1)
@@ -43,10 +43,10 @@ class XLSReport():
 
     def apply_preamble(self, max_col):
         self._ws.row_dimensions[1].height = 14
-        self._ws.merge_cells(start_row=1, start_column=1, \
-                       end_row=1,   end_column=max_col)
+        self._ws.merge_cells(start_row=1, start_column=1,
+                             end_row=1,   end_column=max_col)
 
-        self._ws.cell(row=1, column=1).value = "Пользователь: {0:s}. Время: {1:s}"\
+        self._ws.cell(row=1, column=1).value = "Пользователь: {0:s}. Дата и время: {1:s}"\
                 .format(os.getlogin(), datetime.datetime.now().strftime("%A %d %B %Y %H:%M"))
         apply_range(self._ws, 1, 1, 1, max_col, set_font, size=9, italic=True)
         apply_range(self._ws, 1, 1, 1, max_col, set_alignment, horizontal='right', vertical='top')
@@ -57,10 +57,11 @@ class XLSReport():
         label.apply(self._wb.active, first_row, first_col, col_count)
         return first_row + 1
 
-
     def apply_tableheader(self, tableheader, first_row, first_col=1):
         return tableheader.apply(self._wb.active, first_row, first_col)
 
+    def apply_column_widths(self, tableheader):
+        tableheader.apply_widths(self._wb.active)
 
     def apply_table(self, table, first_row, first_col=1):
         return table.apply(self._wb.active, first_row, first_col)

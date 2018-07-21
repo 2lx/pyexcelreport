@@ -27,8 +27,10 @@ tableheader = XLSTableHeader( headers=(\
         ) )
 max_col = tableheader.column_count()
 
+cur_row = rep.apply_column_widths(tableheader)
 cur_row = rep.apply_preamble(max_col)
-cur_row = rep.apply_label(XLSLabel('Прибыла ТЕ такого то числа', 1), first_row=cur_row, col_count=max_col)
+cur_row = rep.apply_label(XLSLabel('Прибыла ТЕ такого то числа', 1),
+                          first_row=cur_row, col_count=max_col)
 cur_row = rep.apply_tableheader(tableheader, first_row=cur_row)
 
 table_info = (\
@@ -69,4 +71,3 @@ table = XLSTable(table_info, table_data )
 cur_row = rep.apply_table(table, first_row=cur_row)
 
 rep.launch_excel()
-print("OK")

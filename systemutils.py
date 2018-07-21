@@ -27,7 +27,7 @@ def temporary_file(filename_pattern='sample'):
     in system user termporary directory'
     """
     for cnt in range(1, 100):
-        newfilename = '{0:s}{1:s}{2:s}{3:0>2d}.xlsx'.format(\
+        newfilename = '{0:s}{1:s}{2:s}{3:0>2d}.xlsx'.format(
                 tempfile.gettempdir(), os.sep, filename_pattern, cnt)
         if not is_exists_and_locked(newfilename):
             break
