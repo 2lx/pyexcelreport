@@ -53,14 +53,12 @@ def set_outline(ws, start_row, start_col, end_row, end_col, border_style='thin')
         cl.border = new_border
 
     for r in range(start_row, end_row + 1):
-        for c in range(start_col, end_col + 1):
-            if (c not in [start_col, end_col]) and (r not in [start_row, end_row]):
-                continue
+        _apply_border(ws.cell(row=r, column=start_col), 'left')
+        _apply_border(ws.cell(row=r, column=end_col), 'right')
 
-            if c == start_col: _apply_border(ws.cell(row=r, column=start_col), 'left')
-            if c == end_col:   _apply_border(ws.cell(row=r, column=end_col), 'right')
-            if r == start_row: _apply_border(ws.cell(row=start_row, column=c), 'top')
-            if r == end_row:   _apply_border(ws.cell(row=end_row, column=c), 'bottom')
+    for c in range(start_col, end_col + 1):
+        _apply_border(ws.cell(row=start_row, column=c), 'top')
+        _apply_border(ws.cell(row=end_row, column=c), 'bottom')
 
 def set_font(ws, start_row, start_col, end_row, end_col, \
             name='Calibri', size=11, bold=False, italic=False, underline='none', \
