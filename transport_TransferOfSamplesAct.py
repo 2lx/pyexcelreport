@@ -7,19 +7,22 @@ from xlstableheader import *
 from xlstable import *
 from sqltabledata import *
 
+import locale
+locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
+
 THC=XLSTableHeaderColumn
 TCI=XLSTableColumnInfo
 
 rep = XLSReport('Акт передачи образцов')
 
 tableheader = XLSTableHeader( headers=(\
-    THC( 'Артикул',         width=20 ),
-    THC( 'Цвет ШП/Global',  width=20 ),
-    THC( 'Размеры',         struct=[\
-        THC(title='размер', width=7),
-        ]*13 ),
-    THC( 'Номера коробок',  width=20 ),
-    ) )
+        THC( 'Артикул',         width=20 ),
+        THC( 'Цвет ШП/Global',  width=20 ),
+        THC( 'Размеры',         struct=[\
+                THC(title='размер', width=7),
+                ]*13 ),
+        THC( 'Номера коробок',  width=20 ),
+        ) )
 max_col = tableheader.column_count()
 print(max_col)
 
@@ -28,27 +31,27 @@ cur_row = rep.apply_label(XLSLabel('Прибыла ТЕ такого то чис
 cur_row = rep.apply_tableheader(tableheader, first_row=cur_row)
 
 table_info = (\
-    TCI('ArticleGlobalCode',  'string', 1),
-    TCI('OItemColorName',  'string', 1),
-    TCI('Sum1',  'int',    1),
-    TCI('Sum2',  'int',    1),
-    TCI('Sum3',  'int',    1),
-    TCI('Sum4',  'int',    1),
-    TCI('Sum5',  'int',    1),
-    TCI('Sum6',  'int',    1),
-    TCI('Sum7',  'int',    1),
-    TCI('Sum8',  'int',    1),
-    TCI('Sum9',  'int',    1),
-    TCI('Sum10', 'int',    1),
-    TCI('Sum11', 'int',    1),
-    TCI('Sum12', 'int',    1),
-    TCI('Sum13', 'int',    1),
-    TCI('',      'string', 1),
-    )
+        TCI('ArticleGlobalCode',  'string', 1),
+        TCI('OItemColorName',  'string', 1),
+        TCI('Sum1',  'int',    1),
+        TCI('Sum2',  'int',    1),
+        TCI('Sum3',  'int',    1),
+        TCI('Sum4',  'int',    1),
+        TCI('Sum5',  'int',    1),
+        TCI('Sum6',  'int',    1),
+        TCI('Sum7',  'int',    1),
+        TCI('Sum8',  'int',    1),
+        TCI('Sum9',  'int',    1),
+        TCI('Sum10', 'int',    1),
+        TCI('Sum11', 'int',    1),
+        TCI('Sum12', 'int',    1),
+        TCI('Sum13', 'int',    1),
+        TCI('',      'string', 1),
+        )
 
 sqlprocedure = "ORDERS.dbo.OMS_TRANSPORT_ReportPackageGlobalInvoiceList"
-sqlparamlist = ( "'{53DAD87F-8C0F-4178-9A27-9F686E44A8FD}'", )
-sqlquery = "EXEC {0:s} {1:s}".format(sqlprocedure, ", ".join(sqlparamlist))
+sqlparamlist = ( "{53DAD87F-8C0F-4178-9A27-9F686E44A8FD}", )
+sqlquery = "EXEC {0:s} {1:s}".format(sqlprocedure, ", ".join(map(maybe_sqlquoted, sqlparamlist)))
 
 table_data = get_table_data( sqlquery, table_info )
 #table_data = ( \

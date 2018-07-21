@@ -4,6 +4,16 @@
 from xlstable import *
 import config
 import pymssql
+import re
+import datetime
+
+UUID_PATTERN = re.compile(r'^[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}$', re.IGNORECASE)
+
+def maybe_sqlquoted(param):
+    if (UUID_PATTERN.match(param)) or (type(param) == [datetime.date]) or isinstance(param, str):
+        param = "'{0:s}'".format(param)
+    return param
+
 
 def get_table_data(sqlquery, table_info):
     conn = pymssql.connect( server=config.mssql_server,

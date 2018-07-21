@@ -46,8 +46,6 @@ def set_outline(ws, start_row, start_col, end_row, end_col, border_style='thin')
     """
     """
     def _apply_border(cl, side_name):
-        """Applies outline to the cell
-        """
         new_border = copy(cl.border)
         getattr(new_border, side_name).border_style = border_style
         cl.border = new_border
