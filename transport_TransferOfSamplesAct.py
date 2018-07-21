@@ -24,7 +24,6 @@ tableheader = XLSTableHeader( headers=(\
         THC( 'Номера коробок',  width=20 ),
         ) )
 max_col = tableheader.column_count()
-print(max_col)
 
 cur_row = rep.apply_preamble(max_col)
 cur_row = rep.apply_label(XLSLabel('Прибыла ТЕ такого то числа', 1), first_row=cur_row, col_count=max_col)
@@ -52,7 +51,7 @@ table_info = (\
 sqlprocedure = "ORDERS.dbo.OMS_TRANSPORT_ReportPackageGlobalInvoiceList"
 sqlparamlist = ( "{53DAD87F-8C0F-4178-9A27-9F686E44A8FD}", )
 sqlquery = "EXEC {0:s} {1:s}".format(sqlprocedure, ", ".join(map(maybe_sqlquoted, sqlparamlist)))
-
+#print(sqlquery)
 table_data = get_table_data( sqlquery, table_info )
 #table_data = ( \
 #        [ 'MSH05435', 'черный', 50, 0, 150, 100, 200, 0, 200, 0, 0, 0, 0, 0, 0, '1-50'  ],

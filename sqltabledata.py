@@ -7,10 +7,14 @@ import pymssql
 import re
 import datetime
 
-UUID_PATTERN = re.compile(r'^[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}$', re.IGNORECASE)
+UUID_PATTERN = re.compile(r'^[{]?([\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12})[}]?$', re.IGNORECASE)
 
 def maybe_sqlquoted(param):
-    if (UUID_PATTERN.match(param)) or (type(param) == [datetime.date]) or isinstance(param, str):
+    matched = UUID_PATTERN.match(param)
+    if matched:
+        param = "'{{{0:s}}}'".format(matched.group(1))
+#    if type(param) == [datetime.date]
+    elif isinstance(param, str):
         param = "'{0:s}'".format(param)
     return param
 
