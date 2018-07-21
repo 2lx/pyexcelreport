@@ -17,7 +17,7 @@ TCI=XLSTableColumnInfo
 
 rep = XLSReport('Акт передачи образцов')
 
-tableheader = XLSTableHeader( headers=(\
+tableheader = XLSTableHeader( columns=(\
         THC( 'Артикул',         width=20 ),
         THC( 'Цвет ШП/Global',  width=20 ),
         THC( 'Размеры',         struct=[\
@@ -26,8 +26,8 @@ tableheader = XLSTableHeader( headers=(\
         THC( 'Номера коробок',  width=20 ),
         ) )
 max_col = tableheader.column_count()
+rep.apply_column_widths(tableheader)
 
-cur_row = rep.apply_column_widths(tableheader)
 cur_row = rep.apply_preamble(max_col)
 cur_row = rep.apply_label(XLSLabel('Прибыла ТЕ такого то числа', 1),
                           first_row=cur_row, col_count=max_col)

@@ -60,8 +60,8 @@ class XLSReport():
     def apply_tableheader(self, tableheader, first_row, first_col=1):
         return tableheader.apply(self._wb.active, first_row, first_col)
 
-    def apply_column_widths(self, tableheader):
-        tableheader.apply_widths(self._wb.active)
+    def apply_column_widths(self, tableheader, first_col=1):
+        tableheader.apply_widths(self._wb.active, first_col)
 
     def apply_table(self, table, first_row, first_col=1):
         return table.apply(self._wb.active, first_row, first_col)
