@@ -18,13 +18,12 @@ TCI=XLSTableColumnInfo
 rep = XLSReport('Акт передачи образцов')
 
 tableheader = XLSTableHeader( columns=(
-        THC( 'Артикул',        widths=[20] ),
-        THC( 'Цвет ШП/Global', widths=[20] ),
-        THC( 'Размеры', struct=[
-                THC( 'р', widths=[7] )
-            ]*13 ),
-        THC( 'Номера коробок', widths=[20] ),
+        THC( 'Артикул',         widths=[20] ),
+        THC( 'Цвет ШП/Global',  widths=[20] ),
+        THC( 'Размеры',         widths=[ 7]*13 ),
+        THC( 'Номера коробок',  widths=[20] ),
         ) )
+
 max_col = tableheader.column_count
 rep.apply_column_widths(tableheader)
 
@@ -34,22 +33,22 @@ cur_row = rep.apply_label(XLSLabel('Прибыла ТЕ такого то чис
 cur_row = rep.apply_tableheader(tableheader, first_row=cur_row)
 
 table_info = (\
-        TCI('ArticleGlobalCode',  'string', 1),
-        TCI('OItemColorName',  'string', 1),
-        TCI('Sum1',  'int',    1),
-        TCI('Sum2',  'int',    1),
-        TCI('Sum3',  'int',    1),
-        TCI('Sum4',  'int',    1),
-        TCI('Sum5',  'int',    1),
-        TCI('Sum6',  'int',    1),
-        TCI('Sum7',  'int',    1),
-        TCI('Sum8',  'int',    1),
-        TCI('Sum9',  'int',    1),
-        TCI('Sum10', 'int',    1),
-        TCI('Sum11', 'int',    1),
-        TCI('Sum12', 'int',    1),
-        TCI('Sum13', 'int',    1),
-        TCI('',      'string', 1),
+        TCI('ArticleGlobalCode',    'string', 1),
+        TCI('OItemColorName',       'string', 1),
+        TCI('Sum1',                 'int',    1),
+        TCI('Sum2',                 'int',    1),
+        TCI('Sum3',                 'int',    1),
+        TCI('Sum4',                 'int',    1),
+        TCI('Sum5',                 'int',    1),
+        TCI('Sum6',                 'int',    1),
+        TCI('Sum7',                 'int',    1),
+        TCI('Sum8',                 'int',    1),
+        TCI('Sum9',                 'int',    1),
+        TCI('Sum10',                'int',    1),
+        TCI('Sum11',                'int',    1),
+        TCI('Sum12',                'int',    1),
+        TCI('Sum13',                'int',    1),
+        TCI('',                     'string', 1),
         )
 
 if sys.platform.startswith('win'):
@@ -57,7 +56,7 @@ if sys.platform.startswith('win'):
     sqlparamlist = ( "{53DAD87F-8C0F-4178-9A27-9F686E44A8FD}", )
     sqlquery = "EXEC {0:s} {1:s}".format(sqlprocedure, ", ".join(map(maybe_sqlquoted, sqlparamlist)))
     #  print(sqlquery)
-    table_data = get_table_data( sqlquery, table_info )
+    table_data = get_table_data(sqlquery, table_info)
 else:
     table_data = ( \
         [ 'MSH05435', 'черный', 50, 0, 150, 100, 200, 0, 200, 0, 0, 0, 0, 0, 0, '1-50'  ],
@@ -68,6 +67,10 @@ else:
         [ 'MSH05437', 'желтый', 50, 0, 150, 200, 200, 0,   0, 0, 0, 0, 0, 0, 0, '1-50'  ] )
 
 table = XLSTable(table_info, table_data )
+fn = lambda x: x == 0
+for i in range(1, 14):
+    table.add_hide_column_condition("Sum{0:d}".format(i), fn)
+
 cur_row = rep.apply_table(table, first_row=cur_row)
 
 rep.launch_excel()
