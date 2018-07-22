@@ -25,7 +25,7 @@ class XLSTableHeaderColumn:
         else: return 1
 
     def _get_height(self):
-        """Подсчитывает высоту столбца
+        """Подсчитывает высоту столбца в строках листа
         """
         return 1 + max([s.height for s in self.struct], default=0)
 
@@ -61,24 +61,28 @@ class XLSTableHeader:
     def apply(self, ws, first_row, first_col):
         """Отображает непосредственно в XLS шапку таблицы
         """
-        def _traverse_leaves_and_print_title(header, cur_col):
-            pass
+        def _traverse_tree_and_print_title(colinfo, cur_col, cur_height):
+            start_row = first_row + cur_height
+            end_row = start_row if colinfo.height > 1 else first_row + self.height - 1
+            end_col = cur_col + colinfo.count - 1
+
+            ws.merge_cells(start_row=start_row, start_column=cur_col,
+                           end_row=end_row,     end_column=end_col)
+            ws.cell(row=start_row, column=cur_col).value = colinfo.title
+
+            for coli in colinfo.struct:
+                _traverse_tree_and_print_title(coli, cur_col, cur_height + 1)
+                cur_col += coli.count
+
 
         ws.row_dimensions[first_row].height = 50 if self.height == 1 else 24
         for i in range(1, self.height):
             ws.row_dimensions[first_row + i].height = 32
 
         cur_col = first_col
-        for col in self._columns:
-            if col.count > 1:
-                ws.merge_cells(start_row=first_row, start_column=cur_col,
-                               end_row=first_row, end_column=cur_col + col.count - 1)
-            else:
-                ws.merge_cells(start_row=first_row, start_column=cur_col,
-                               end_row=first_row + self.height - 1, end_column=cur_col)
-
-            ws.cell(row=first_row, column=cur_col).value = col.title
-            cur_col += col.count
+        for colinfo in self._columns:
+            _traverse_tree_and_print_title(colinfo, cur_col, 0)
+            cur_col += colinfo.count
 
         clr = get_xlrange(first_row, first_col,
                           first_row + self.height - 1, cur_col - 1)
