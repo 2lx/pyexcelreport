@@ -7,39 +7,60 @@ from openpyxl.utils import get_column_letter
 class XLSTableColumnInfo:
     """Структура для хранения информации одного столбца данных таблицы
     """
-    def __init__(self, fieldname, type = 'string', count=1, editable=False):
+    def __init__(self, fieldname, data_type = 'string', count=1, editable=False):
         self.fieldname  = fieldname
         self.count      = count
-        self.type       = type
+        self.type       = data_type
         self.editable   = editable
 
 class XLSTable:
     """Класс, инкапсулирующий информацию и методы отображения данных таблицы
     """
-    def __init__(self, colinfo, data):
+    def __init__(self, colinfo, data, row_height=30):
         self._colinfo = colinfo
         self._data = data
+        self._row_height = row_height
+
         self._col_count = sum(coli.count for coli in colinfo)
         self._row_count = len(data)
+
+        # используются в алгоритме скрытия колонок по условию
         self._col_conditions = dict()
         self._col_hidden = dict()
 
-    def column_count(self):
-        """Возвращает количество физических столбцов в таблице
-        """
-        return self._col_count
+        # используются в алгоритмах подитогов/подзаголовках/объединения строк с одинаковыми значениями
+        self._col_lastvalue = dict()
+        self._col_mergedhierarchy = []
 
     def add_hide_column_condition(self, field_name, cond_func):
         self._col_conditions[field_name] = cond_func
         self._col_hidden[field_name] = 1
 
+    def add_merge_column_hierarchy(self, field_hierarchy):
+        for fh in field_hierarchy:
+            if isinstance(fh, tuple):
+                for it in fh: self._col_lastvalue[it] = None
+            else: self._col_lastvalue[fh] = None
+
+        self._col_mergedhierarchy = field_hierarchy
+
     def apply(self, ws, first_row, first_col):
         """Отображает непосредственно в XLS данные таблицы
         """
-        #print data
+        def _conditionally_hide_columns():
+            """Скрывает колонки для которых для каждого значения в столбце выполнились условия скрытия
+            """
+            hidden_columns = [k for k, i in self._col_hidden.items() if i == 1]
+
+            cur_col = first_col
+            for coli in self._colinfo:
+                if coli.fieldname in hidden_columns:
+                    ws.column_dimensions[get_column_letter(cur_col)].hidden = True
+                cur_col += coli.count
+
         cur_row = first_row
         for row in self._data:
-            ws.row_dimensions[cur_row].height = 30
+            ws.row_dimensions[cur_row].height = self._row_height
 
             cur_col = first_col
             col_index = 0
@@ -59,15 +80,7 @@ class XLSTable:
                 col_index += 1
             cur_row += 1
 
-        # conditionally hide columns
-        hidden_columns = [k for k, i in self._col_hidden.items() if i == 1]
-
-        cur_col = first_col
-        for coli in self._colinfo:
-            if coli.fieldname in hidden_columns:
-                print('hide')
-                ws.column_dimensions[get_column_letter(cur_col)].hidden = True
-            cur_col += coli.count
+        _conditionally_hide_columns()
 
         # apply format and alignment
         cur_col = first_col
