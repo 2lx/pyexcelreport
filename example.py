@@ -17,6 +17,7 @@ rep = XLSReport('Акт передачи образцов')
 tableheader = XLSTableHeader( columns=(
         THC( 'Артикул',         widths=[20] ),
         THC( 'Цвет ШП/Global',  widths=[20] ),
+        #THC( 'Размеры',         struct=[ THC('р', widths=[ 7]) ]*13 ),
         THC( 'Размеры',         widths=[ 7]*13 ),
         THC( 'Номера коробок',  widths=[20] ),
         ) )
