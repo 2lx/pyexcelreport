@@ -4,6 +4,8 @@
 from xlsutils_apply import *
 from openpyxl.utils import get_column_letter
 
+from collections import namedtuple
+
 class XLSTableColumnInfo:
     """Структура для хранения информации одного столбца данных таблицы
     """
@@ -13,14 +15,16 @@ class XLSTableColumnInfo:
         self.type       = data_type
         self.editable   = editable
 
+FieldStat = namedtuple('FieldStat', 'index xls_start xls_end last_value last_value_row')
+
 class XLSTable:
     """Класс, инкапсулирующий информацию и методы отображения данных таблицы
     """
     def __init__(self, colinfo, data, row_height=30):
-        self._colinfo = colinfo
+        self._columns = colinfo
         self._data = data
-        self._row_height = row_height
 
+        self._row_height = row_height
         self._col_count = sum(coli.count for coli in colinfo)
         self._row_count = len(data)
 
@@ -28,23 +32,29 @@ class XLSTable:
         self._col_conditions = dict()
         self._col_hidden = dict()
 
-        # используются в алгоритмах подитогов/подзаголовках/объединения строк с одинаковыми значениями
-        self._fieldstat = dict()
-        cur_index = 0
+        # используется в алгоритмах подитогов/подзаголовках/объединения строк с одинаковыми значениями
+        self._fields = dict()
+
+        index = 0
+        xls_index = 0
         for coli in colinfo:
-            # информация в _fieldstat: номер столбца среди столбцов в данных, последнее значение, строка, с которой не менялись данные
-            self._fieldstat[coli.fieldname] = [cur_index, None, None]
-            cur_index += 1
+            self._fields[coli.fieldname] = FieldStat(index=index,
+                                                        xls_start=xls_index,
+                                                        xls_end=xls_index + coli.count - 1,
+                                                        last_value=None,
+                                                        last_value_row=None)
+            index += 1
+            xls_index += coli.count
 
         # используются в алгоритме объединения строк с одинаковыми значениями
-        self._col_mergedhierarchy = []
+        self._merged_hierarchy = []
 
     def add_hide_column_condition(self, field_name, cond_func):
         self._col_conditions[field_name] = cond_func
         self._col_hidden[field_name] = 1
 
     def add_merge_column_hierarchy(self, field_hierarchy):
-        self._col_mergedhierarchy = field_hierarchy
+        self._merged_hierarchy = field_hierarchy
 
     def apply(self, ws, first_row, first_col):
         """Отображает непосредственно в XLS данные таблицы
@@ -55,74 +65,64 @@ class XLSTable:
             hidden_columns = [k for k, i in self._col_hidden.items() if i == 1]
 
             cur_col = first_col
-            for coli in self._colinfo:
+            for coli in self._columns:
                 if coli.fieldname in hidden_columns:
                     ws.column_dimensions[get_column_letter(cur_col)].hidden = True
                 cur_col += coli.count
 
-        def _save_last_values_and_merge(row, coli, col_index, cur_row, cur_col):
-            # сохраняем предыдущее значение всех полей, которые проверяем в алгоритмах
-            if coli.fieldname in self._fieldstat.keys():
-                # если изначальное значение ещё не задано
-                if  (self._fieldstat[coli.fieldname][1] is None):
-                    self._fieldstat[coli.fieldname][1] = row[col_index]
-                    self._fieldstat[coli.fieldname][2] = cur_row
-                # возможно значение изменилось в самом столбце, либо в иерархии выше него
-                elif (coli.fieldname in self._col_mergedhierarchy):
-                    nothing_changes = True
-                    for fh in self._col_mergedhierarchy:
-                        if row[self._fieldstat[fh][0]] != self._fieldstat[fh][1]:
-                            nothing_changes = False
-                            break
-                        if fh == coli.fieldname: break
+        def _save_last_values_and_merge(row, cur_row):
+            """сохраняем предыдущие значения всех полей, которые надо объединять, объединяем их
+            """
+            was_changed = False
+            for fieldname in self._merged_hierarchy:
+                col = self._fields[fieldname]
+                new_value = row[col.index] if row else None
 
-                    # выяснили, что поле или поля от которых поле зависит изменились
-                    if not nothing_changes:
-                        merge_start_row = self._fieldstat[coli.fieldname][2]
-                        print("({0:d},{1:d}) - ({2:d},{3:d})".format(merge_start_row, cur_col, cur_row, cur_col + coli.count - 1))
-                        ws.merge_cells(start_row=merge_start_row, start_column=cur_col,
-                                       end_row=cur_row - 1,       end_column=cur_col + coli.count - 1)
+                if (new_value != col.last_value): was_changed = True
 
-                        self._fieldstat[coli.fieldname][1] = row[col_index]
-                        self._fieldstat[coli.fieldname][2] = cur_row
+                if was_changed and (col.last_value_row is not None):
+                    start_xlscol = first_col + col.xls_start
+                    end_xlscol   = first_col + col.xls_end
+                    ws.merge_cells(start_row=col.last_value_row, start_column=start_xlscol,
+                                   end_row=cur_row - 1,          end_column=end_xlscol)
+                   # print("({0:d},{1:d}) - ({2:d},{3:d})".format(col.last_value_row, xls_start,
+                   #                                              cur_row - 1, xls_end))
+                if was_changed:
+                    self._fields[fieldname] = col._replace(last_value=new_value,
+                                                              last_value_row=cur_row)
 
         cur_row = first_row
-        for row in self._data:
+        for data_row in self._data:
             ws.row_dimensions[cur_row].height = self._row_height
 
             cur_col = first_col
             col_index = 0
-            for coli in self._colinfo:
+            for coli in self._columns:
                 if (coli.count > 1):
                     ws.merge_cells(start_row=cur_row, start_column=cur_col,
                                    end_row=cur_row,   end_column=cur_col + coli.count - 1)
 
-                if (coli.type not in ['int', 'currency', '3digit']) or (row[col_index] != 0):
-                    ws.cell(row=cur_row, column=cur_col).value = row[col_index]
+                if (coli.type not in ['int', 'currency', '3digit']) or (data_row[col_index] != 0):
+                    ws.cell(row=cur_row, column=cur_col).value = data_row[col_index]
 
                 if coli.fieldname in self._col_conditions.keys():
-                    if not self._col_conditions[coli.fieldname](row[col_index]):
+                    if not self._col_conditions[coli.fieldname](data_row[col_index]):
                         self._col_hidden[coli.fieldname] = 0
 
-                _save_last_values_and_merge(row, coli, col_index, cur_row, cur_col)
-
-                # работа в цикл
+                # работа в цикле
                 cur_col += coli.count
                 col_index += 1
+
+            _save_last_values_and_merge(data_row, cur_row)
             cur_row += 1
 
-        erow = [None] * len(self._colinfo)
-        cur_col = first_col
-        col_index = 0
-        for coli in self._colinfo:
-            _save_last_values_and_merge(erow, coli, col_index, cur_row, cur_col)
-            cur_col += coli.count
-            col_index += 1
+        _save_last_values_and_merge(None, cur_row)
+
         _conditionally_hide_columns()
 
         # apply format and alignment
         cur_col = first_col
-        for coli in self._colinfo:
+        for coli in self._columns:
             if coli.type in ['int', 'currency', '3digit']:
                 apply_range(ws, first_row, cur_col, cur_row -1, cur_col,
                         set_alignment, horizontal='right')
