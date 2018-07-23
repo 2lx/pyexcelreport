@@ -66,8 +66,7 @@ class XLSTableHeader:
             end_row = start_row if colinfo.height > 1 else first_row + self.height - 1
             end_col = cur_col + colinfo.count - 1
 
-            ws.merge_cells(start_row=start_row, start_column=cur_col,
-                           end_row=end_row,     end_column=end_col)
+            apply_range(ws, start_row, cur_col, end_row, end_col, set_merge)
             ws.cell(row=start_row, column=cur_col).value = colinfo.title
 
             for coli in colinfo.struct:

@@ -23,8 +23,7 @@ class XLSLabel:
 
     def apply(self, ws, first_row, first_col=1, col_count=1):
         ws.row_dimensions[first_row].height = self.heading.value[0]
-        ws.merge_cells(start_row=first_row, start_column=first_col,
-                       end_row=first_row,   end_column=first_col + col_count - 1)
+        apply_range(ws, first_row, first_col, first_row, first_col + col_count -1, set_merge)
 
         ws.cell(row=first_row, column=first_col).value = self.title
 

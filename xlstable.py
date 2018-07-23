@@ -71,25 +71,21 @@ class XLSTable:
                 cur_col += coli.count
 
         def _save_last_values_and_merge(row, cur_row):
-            """сохраняем предыдущие значения всех полей, которые надо объединять, объединяем их
+            """сохраняем предыдущие значения полей, объединяем ячейки с одинаковыми значениями
             """
             was_changed = False
             for fieldname in self._merged_hierarchy:
                 col = self._fields[fieldname]
                 new_value = row[col.index] if row else None
 
-                if (new_value != col.last_value): was_changed = True
-
+                if (new_value != col.last_value):
+                    was_changed = True
                 if was_changed and (col.last_value_row is not None):
-                    start_xlscol = first_col + col.xls_start
-                    end_xlscol   = first_col + col.xls_end
-                    ws.merge_cells(start_row=col.last_value_row, start_column=start_xlscol,
-                                   end_row=cur_row - 1,          end_column=end_xlscol)
-                   # print("({0:d},{1:d}) - ({2:d},{3:d})".format(col.last_value_row, xls_start,
-                   #                                              cur_row - 1, xls_end))
+                    apply_range(ws, col.last_value_row, first_col + col.xls_start,
+                                    cur_row - 1,        first_col + col.xls_end, set_merge)
                 if was_changed:
                     self._fields[fieldname] = col._replace(last_value=new_value,
-                                                              last_value_row=cur_row)
+                                                           last_value_row=cur_row)
 
         cur_row = first_row
         for data_row in self._data:
@@ -99,8 +95,7 @@ class XLSTable:
             col_index = 0
             for coli in self._columns:
                 if (coli.count > 1):
-                    ws.merge_cells(start_row=cur_row, start_column=cur_col,
-                                   end_row=cur_row,   end_column=cur_col + coli.count - 1)
+                    apply_range(ws, cur_row, cur_col, cur_row, cur_col + coli.count - 1, set_merge)
 
                 if (coli.type not in ['int', 'currency', '3digit']) or (data_row[col_index] != 0):
                     ws.cell(row=cur_row, column=cur_col).value = data_row[col_index]

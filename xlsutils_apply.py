@@ -32,6 +32,11 @@ def apply_xlrange(ws, range, f, *args, **kwargs):
 """Apply functions
 """
 
+def set_merge(ws, start_row, start_col, end_row, end_col):
+    ws.merge_cells(start_row=start_row, start_column=start_col,
+                   end_row=end_row,     end_column=end_col)
+    #  print("({0:d},{1:d}) - ({2:d},{3:d})".format(start_row, start_col, end_row, end_col))
+
 def set_borders(ws, start_row, start_col, end_row, end_col, border_style='thin'):
     """
     """
