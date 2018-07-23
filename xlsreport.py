@@ -4,6 +4,7 @@
 import os
 import datetime
 from enum import Enum
+from collections import namedtuple
 
 from openpyxl.styles.protection import Protection
 
@@ -16,23 +17,25 @@ from xlsutils import *
 from systemutils import *
 from xlsutils_apply import *
 
-class PrintConf(Enum):
+PrintSetupStruct = namedtuple('PrintSetupStruct', 'orientation pages_width')
+
+class PrintSetup(Enum):
     """Параметры печати печати
     """
-    PortraitW1  = ('portrait',  1)
-    LandscapeW1 = ('landscape', 1)
-    LandscapeW2 = ('landscape', 2)
+    PortraitW1  = PrintSetupStruct('portrait',  1)
+    LandscapeW1 = PrintSetupStruct('landscape', 1)
+    LandscapeW2 = PrintSetupStruct('landscape', 2)
 
 class XLSReport():
     """Класс, инкапсулирующий в себе методы для создания отчета в Excel
     """
 
-    def __init__(self, sheet_name='Новый лист', print_conf=PrintConf.LandscapeW1, protection=True):
+    def __init__(self, sheet_name='Новый лист', print_setup=PrintSetup.LandscapeW1, protection=True):
         """Конструктор, создает книгу с одним именованным листом, устанавливает параметры для печати
         """
         self._wb = workbook_create()
         self._ws = sheet_create(self._wb, sheet_name)
-        sheet_print_setup(self._ws, print_conf.value[0], print_conf.value[1])
+        sheet_print_setup(self._ws, print_setup.value.orientation, print_setup.value.pages_width)
         self.protection = protection
         self._ws.protection.sheet = protection
 
