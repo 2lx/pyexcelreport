@@ -15,7 +15,8 @@ class XLSTableColumnInfo:
         self.type       = data_type
         self.editable   = editable
 
-FieldStat = namedtuple('FieldStat', 'index xls_start xls_end last_value last_value_row')
+FieldStat = namedtuple('FieldStat', 'index format xls_start xls_end last_value last_value_row '\
+                                    'hide_condition hide_flag')
 
 class XLSTable:
     """Класс, инкапсулирующий информацию и методы отображения данных таблицы
@@ -28,10 +29,6 @@ class XLSTable:
         self._col_count = sum(coli.count for coli in colinfo)
         self._row_count = len(data)
 
-        # используются в алгоритме скрытия колонок по условию
-        self._col_conditions = dict()
-        self._col_hidden = dict()
-
         # используется в алгоритмах подитогов/подзаголовках/объединения строк с одинаковыми значениями
         self._fields = dict()
 
@@ -39,19 +36,22 @@ class XLSTable:
         xls_index = 0
         for coli in colinfo:
             self._fields[coli.fieldname] = FieldStat(index=index,
-                                                        xls_start=xls_index,
-                                                        xls_end=xls_index + coli.count - 1,
-                                                        last_value=None,
-                                                        last_value_row=None)
+                                                     format=coli.type,
+                                                     xls_start=xls_index,
+                                                     xls_end=xls_index + coli.count - 1,
+                                                     last_value=None,
+                                                     last_value_row=None,
+                                                     hide_condition=None,
+                                                     hide_flag=None)
             index += 1
             xls_index += coli.count
 
         # используются в алгоритме объединения строк с одинаковыми значениями
         self._merged_hierarchy = []
 
-    def add_hide_column_condition(self, field_name, cond_func):
-        self._col_conditions[field_name] = cond_func
-        self._col_hidden[field_name] = 1
+    def add_hide_column_condition(self, fieldname, cond_func):
+        self._fields[fieldname] = self._fields[fieldname]._replace(hide_condition=cond_func,
+                                                                   hide_flag=True)
 
     def add_merge_column_hierarchy(self, field_hierarchy):
         self._merged_hierarchy = field_hierarchy
@@ -59,17 +59,6 @@ class XLSTable:
     def apply(self, ws, first_row, first_col):
         """Отображает непосредственно в XLS данные таблицы
         """
-        def _conditionally_hide_columns():
-            """Скрывает колонки для которых для каждого значения в столбце выполнились условия скрытия
-            """
-            hidden_columns = [k for k, i in self._col_hidden.items() if i == 1]
-
-            cur_col = first_col
-            for coli in self._columns:
-                if coli.fieldname in hidden_columns:
-                    ws.column_dimensions[get_column_letter(cur_col)].hidden = True
-                cur_col += coli.count
-
         def _save_last_values_and_merge(row, cur_row):
             """сохраняем предыдущие значения полей, объединяем ячейки с одинаковыми значениями
             """
@@ -91,29 +80,28 @@ class XLSTable:
         for data_row in self._data:
             ws.row_dimensions[cur_row].height = self._row_height
 
-            cur_col = first_col
-            col_index = 0
-            for coli in self._columns:
-                if (coli.count > 1):
-                    apply_range(ws, cur_row, cur_col, cur_row, cur_col + coli.count - 1, set_merge)
+            for k, f in self._fields.items():
+                if (f.xls_start - f.xls_end > 1):
+                    apply_range(ws, cur_row, first_col + f.xls_start,
+                                    cur_row, first_col + f.xls_end, set_merge)
 
-                if (coli.type not in ['int', 'currency', '3digit']) or (data_row[col_index] != 0):
-                    ws.cell(row=cur_row, column=cur_col).value = data_row[col_index]
+                if (f.format not in ['int', 'currency', '3digit']) or (data_row[f.index] != 0):
+                    ws.cell(row=cur_row, column=first_col + f.xls_start).value = data_row[f.index]
 
-                if coli.fieldname in self._col_conditions.keys():
-                    if not self._col_conditions[coli.fieldname](data_row[col_index]):
-                        self._col_hidden[coli.fieldname] = 0
-
-                # работа в цикле
-                cur_col += coli.count
-                col_index += 1
+                if f.hide_condition is not None:
+                    if not f.hide_condition(data_row[f.index]):
+                        self._fields[k] = self._fields[k]._replace(hide_flag=False)
 
             _save_last_values_and_merge(data_row, cur_row)
             cur_row += 1
 
         _save_last_values_and_merge(None, cur_row)
 
-        _conditionally_hide_columns()
+        # скрываем все колонки, для которых не выполнились условия
+        fields = [[fn.xls_start, fn.xls_end] for fn in self._fields.values() if fn.hide_flag]
+        for fstart, fend in fields:
+            for i in range(fstart, fend + 1):
+                ws.column_dimensions[get_column_letter(first_col + i)].hidden = True
 
         # apply format and alignment
         cur_col = first_col
