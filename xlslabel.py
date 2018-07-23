@@ -2,30 +2,36 @@
 # -*- coding: utf-8 -*-
 
 from xlsutils_apply import *
+from enum import Enum
+
+class LabelHeading(Enum):
+    """Параметры отображения метки
+          Высота строки, жирный текст, размер текста, гор. выр-е, верт выр-е
+    """
+    h1 = (30, True,   14, 'center', 'center')
+    h2 = (24, True,   12, 'center', 'center')
+    h3 = (20, True,   11, 'center', 'center')
+    h4 = (20, False,  11, 'center', 'center')
+    h5 = (18, False,  11, 'left',   'top')
 
 class XLSLabel:
     """Класс, инкапсулирующий информацию и методы отображения заголовка
     """
-    def __init__(self, title, importance=1):
+    def __init__(self, title, heading=LabelHeading.h1):
         self.title=title
-        self.importance=importance
+        self.heading=heading
 
     def apply(self, ws, first_row, first_col=1, col_count=1):
-        ws.row_dimensions[first_row].height = 30
-        ws.merge_cells(start_row=first_row, start_column=first_col, \
+        ws.row_dimensions[first_row].height = self.heading.value[0]
+        ws.merge_cells(start_row=first_row, start_column=first_col,
                        end_row=first_row,   end_column=first_col + col_count - 1)
 
         ws.cell(row=first_row, column=first_col).value = self.title
 
-        range = CellRange(min_row=first_row, min_col=first_col, \
+        range = CellRange(min_row=first_row, min_col=first_col,
                           max_row=first_row, max_col=first_col + col_count - 1)
-        if self.importance == 1:
-            apply_xlrange(ws, range, set_font, bold=True, size=14)
-        if self.importance == 2:
-            apply_xlrange(ws, range, set_font, bold=True, size=12)
-        if self.importance == 3:
-            apply_xlrange(ws, range, set_font, bold=True, size=11)
-        if self.importance == 4:
-            apply_xlrange(ws, range, set_font, bold=False, size=11)
-        apply_xlrange(ws, range, set_alignment)
 
+        apply_xlrange(ws, range, set_font,
+                bold=self.heading.value[1], size=self.heading.value[2])
+        apply_xlrange(ws, range, set_alignment,
+                horizontal=self.heading.value[3], vertical=self.heading.value[4])
