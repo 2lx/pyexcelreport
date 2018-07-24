@@ -86,8 +86,10 @@ for i in range(1, 14):
     table.add_hide_column_condition("Sum{0:d}".format(i), fn)
 
 # указываю поля, которые участвуют в группировках равных значений, для подитога или подзаголовка
-table.add_hierarchy_field('ArticleGlobalCode', merging=True, subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5'])
-table.add_hierarchy_field('OItemColorName', merging=True, subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4'])
+table.add_hierarchy_field('ArticleGlobalCode', merging=True,
+        subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'])
+table.add_hierarchy_field('OItemColorName', merging=True,
+        subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'])
 
 # печатаю отчёт
 cur_row = rep.apply_table(table, first_row=cur_row)

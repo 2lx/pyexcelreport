@@ -95,27 +95,27 @@ class XLSTable:
             fields = [self._fields[fn] for fn in reversed(self._hierarchy) if self._fields[fn].subtotal and self._fields[fn].changed]
             for fch in fields:
                 if (fch.last_value_row is not None) and (fch.last_value_row != cur_row - 1):
-                    ws.row_dimensions[cur_row + stlines].height = 18
-                    ws.cell(row=cur_row + stlines, column=first_col + fch.xls_start).value = 'Подитоги'
-                    apply_cell(ws, cur_row + stlines, first_col + fch.xls_start, set_alignment)
-                    apply_cell(ws, cur_row + stlines, first_col + fch.xls_start, set_font, bold=True)
-                    #  apply_cell(ws, cur_row + stlines, first_col + fch.xls_start, set_fill, color=Color.LT_GRAY.value)
-                    #  apply_range(ws, cur_row + stlines, first_col, cur_row + stlines, first_col + self._col_count - 1,
-                            #  set_fill, color=Color.LT_GRAY.value)
+                    _row, fchcol = cur_row + stlines, first_col + fch.xls_start
+
+                    ws.row_dimensions[_row].height = 18
+                    ws.cell(row=_row, column=fchcol).value = 'Подитоги'
+                    apply_cell(ws, _row, fchcol, set_alignment)
+                    apply_cell(ws, _row, fchcol, set_font, bold=True)
+
                     for st in fch.subtotal:
                         f = self._fields[st]
+                        fcol1, fcol2 = first_col + f.xls_start, first_col + f.xls_end
                         if (f.xls_start - f.xls_end > 1):
-                            apply_range(ws, cur_row + stlines, first_col + f.xls_start,
-                                            cur_row + stlines, first_col + f.xls_end, set_merge)
+                            apply_range(ws, _row, fcol1, _row, fcol2, set_merge)
+
                         formulae = "=SUBTOTAL(9,{0:s}{1:d}:{0:s}{2:d})".format(
-                                get_column_letter(first_col + f.xls_start),
-                                fch.last_value_row, cur_row - 1)
-                        #  print(formulae)
-                        ws.cell(row=cur_row + stlines, column=first_col + f.xls_start).value = formulae
-                        apply_cell(ws, cur_row + stlines, first_col + f.xls_start, set_alignment, horizontal='right')
-                        apply_cell(ws, cur_row + stlines, first_col + f.xls_start, set_format, format=f.format)
-                        apply_cell(ws, cur_row + stlines, first_col + f.xls_start, set_borders)
-                        apply_cell(ws, cur_row + stlines, first_col + f.xls_start, set_fill, color=Color.LT_GRAY.value)
+                                get_column_letter(fcol1), fch.last_value_row, cur_row - 1)
+                        ws.cell(row=_row, column=fcol1).value = formulae
+
+                        apply_cell(ws, _row, fcol1, set_alignment, horizontal='right')
+                        apply_cell(ws, _row, fcol1, set_format, format=f.format)
+                        apply_cell(ws, _row, fcol1, set_borders)
+                        apply_cell(ws, _row, fcol1, set_fill, color=Color.LT_GRAY.value)
                     stlines += 1
 
             return cur_row + stlines
@@ -155,7 +155,6 @@ class XLSTable:
             # apply borders, outline, font
             cr = get_xlrange(cur_row, first_col, cur_row, first_col + self._col_count - 1)
             apply_xlrange(ws, cr, set_borders)
-            #  #  apply_xlrange(ws, cr, set_outline, border_style='medium')
             apply_xlrange(ws, cr, set_font)
 
             cur_row += 1
