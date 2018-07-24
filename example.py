@@ -85,9 +85,9 @@ fn = lambda x: x == 0
 for i in range(1, 14):
     table.add_hide_column_condition("Sum{0:d}".format(i), fn)
 
-# указываю столбцы, значения в которых можно объединять по вертикали,
-# если они одинаковые и не было подитогов/подзаголовков
-table.add_merge_column_hierarchy(['ArticleGlobalCode', 'OItemColorName'])
+# указываю поля, которые участвуют в группировках равных значений, для подитога или подзаголовка
+table.add_hierarchy_field('ArticleGlobalCode', merging=True, subtotal=True)
+table.add_hierarchy_field('OItemColorName', merging=True)
 
 # печатаю отчёт
 cur_row = rep.apply_table(table, first_row=cur_row)

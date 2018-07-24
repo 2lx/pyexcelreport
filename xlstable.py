@@ -15,70 +15,77 @@ class XLSTableColumnInfo:
         self.type       = data_type
         self.editable   = editable
 
-FieldStruct = recordclass('FieldStat', 'index format xls_start xls_end last_value last_value_row '
-                                       'hide_condition hide_flag')
+FieldStruct = recordclass('FieldStat', 'index xls_start xls_end format '
+                                       'last_value last_value_row changed '
+                                       'hide_condition hide_flag merging preheader subtotal')
 
 class XLSTable:
     """Класс, инкапсулирующий информацию и методы отображения данных таблицы
     """
     def __init__(self, colinfo, data, row_height=30):
-        #  self._columns = colinfo
-        self._data = data
-
-        self._row_height = row_height
-        self._col_count = sum(coli.count for coli in colinfo)
-        self._row_count = len(data)
-
         # используется в алгоритмах подитогов/подзаголовках/объединения строк с одинаковыми значениями
         self._fields = dict()
-
         index = 0
         xls_index = 0
+
         for coli in colinfo:
-            self._fields[coli.fieldname] = FieldStruct(index=index,
-                                                       format=coli.type,
-                                                       xls_start=xls_index,
-                                                       xls_end=xls_index + coli.count - 1,
-                                                       last_value=None,
-                                                       last_value_row=None,
-                                                       hide_condition=None,
-                                                       hide_flag=None)
+            self._fields[coli.fieldname] = \
+                    FieldStruct(index=index, xls_start=xls_index, xls_end=xls_index + coli.count - 1,
+                                format=coli.type, last_value=None, last_value_row=None, changed=False,
+                                hide_condition=None, hide_flag=None,
+                                merging=False, preheader=None, subtotal=None)
             index += 1
             xls_index += coli.count
 
-        # используются в алгоритме объединения строк с одинаковыми значениями
-        self._merged_hierarchy = []
+        self._data = data
+        self._hierarchy = []
+        self._row_height = row_height
+        self._col_count = sum(coli.count for coli in colinfo)
+        self._row_count = len(data)
 
     def add_hide_column_condition(self, fieldname, cond_func):
         self._fields[fieldname].hide_condition = cond_func
         self._fields[fieldname].hide_flag = True
 
-    def add_merge_column_hierarchy(self, field_hierarchy):
-        self._merged_hierarchy = field_hierarchy
+    def add_hierarchy_field(self, fieldname, merging=False, preheader=None, subtotal=None):
+        self._hierarchy.append(fieldname)
+        self._fields[fieldname].merging = merging
+        self._fields[fieldname].preheader = preheader
+        self._fields[fieldname].subtotal = subtotal
 
     def apply(self, ws, first_row, first_col):
         """Отображает непосредственно в XLS данные таблицы
         """
-        def _save_last_values_and_merge(row, cur_row):
-            """сохраняем предыдущие значения полей, объединяем ячейки с одинаковыми значениями
-            """
+        def _before_line_processing(row):
             was_changed = False
-            for fieldname in self._merged_hierarchy:
-                col = self._fields[fieldname]
-                new_value = row[col.index] if row else None
+            fielddict = {fn:self._fields[fn] for fn in self._hierarchy}.items()
 
-                if (new_value != col.last_value):
+            for fieldname, f in fielddict:
+                if (row is None) or (row[f.index] != f.last_value):
                     was_changed = True
-                if was_changed and (col.last_value_row is not None):
-                    apply_range(ws, col.last_value_row, first_col + col.xls_start,
-                                    cur_row - 1,        first_col + col.xls_end, set_merge)
                 if was_changed:
-                    self._fields[fieldname].last_value = new_value
-                    self._fields[fieldname].last_value_row = cur_row
+                   self._fields[fieldname].changed = True
+
+        def _after_line_processing(row, cur_row):
+            fielddict = {fn:self._fields[fn] for fn in self._hierarchy if self._fields[fn].changed}.items()
+            for fieldname, f in fielddict:
+                self._fields[fieldname].last_value = row[f.index] if row else None
+                self._fields[fieldname].last_value_row = cur_row
+                self._fields[fieldname].changed = False
+
+        def _merge_fields(cur_row):
+            """объединяем ячейки с одинаковыми значениями
+            """
+            fields = [self._fields[fn] for fn in self._hierarchy if self._fields[fn].merging and self._fields[fn].changed]
+            for f in fields:
+                if (f.last_value_row is not None):
+                    apply_range(ws, f.last_value_row, first_col + f.xls_start,
+                                    cur_row - 1,      first_col + f.xls_end, set_merge)
 
         cur_row = first_row
         for data_row in self._data:
             ws.row_dimensions[cur_row].height = self._row_height
+            _before_line_processing(data_row)
 
             for k, f in self._fields.items():
                 if (f.xls_start - f.xls_end > 1):
@@ -92,10 +99,13 @@ class XLSTable:
                 if (f.hide_condition is not None) and (not f.hide_condition(data_row[f.index])):
                         self._fields[k].hide_flag = False
 
-            _save_last_values_and_merge(data_row, cur_row)
+            _merge_fields(cur_row)
+
+            _after_line_processing(data_row, cur_row)
             cur_row += 1
 
-        _save_last_values_and_merge(None, cur_row)
+        _before_line_processing(None)
+        _merge_fields(cur_row)
 
         # скрываем все колонки, для которых не выполнились условия
         fields = [[fn.xls_start, fn.xls_end] for fn in self._fields.values() if fn.hide_flag]
