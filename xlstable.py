@@ -3,6 +3,7 @@
 
 from xlsutils_apply import *
 from openpyxl.utils import get_column_letter
+from xlscolor import *
 
 from recordclass import recordclass
 
@@ -84,19 +85,23 @@ class XLSTable:
                 if (f.last_value_row is not None) and (f.last_value_row != cur_row - 1):
                     apply_range(ws, f.last_value_row, first_col + f.xls_start,
                                     cur_row - 1,      first_col + f.xls_end, set_merge)
+                    apply_range(ws, f.last_value_row, first_col + f.xls_start,
+                                    cur_row - 1,      first_col + f.xls_start, set_borders)
 
         def _make_subtotals(cur_row):
             """делаем подитоги
             """
             stlines = 0
-            fields = [self._fields[fn] for fn in self._hierarchy if self._fields[fn].subtotal and self._fields[fn].changed]
+            fields = [self._fields[fn] for fn in reversed(self._hierarchy) if self._fields[fn].subtotal and self._fields[fn].changed]
             for fch in fields:
                 if (fch.last_value_row is not None) and (fch.last_value_row != cur_row - 1):
                     ws.row_dimensions[cur_row + stlines].height = 18
                     ws.cell(row=cur_row + stlines, column=first_col + fch.xls_start).value = 'Подитоги'
                     apply_cell(ws, cur_row + stlines, first_col + fch.xls_start, set_alignment)
                     apply_cell(ws, cur_row + stlines, first_col + fch.xls_start, set_font, bold=True)
-
+                    #  apply_cell(ws, cur_row + stlines, first_col + fch.xls_start, set_fill, color=Color.LT_GRAY.value)
+                    #  apply_range(ws, cur_row + stlines, first_col, cur_row + stlines, first_col + self._col_count - 1,
+                            #  set_fill, color=Color.LT_GRAY.value)
                     for st in fch.subtotal:
                         f = self._fields[st]
                         if (f.xls_start - f.xls_end > 1):
@@ -110,6 +115,7 @@ class XLSTable:
                         apply_cell(ws, cur_row + stlines, first_col + f.xls_start, set_alignment, horizontal='right')
                         apply_cell(ws, cur_row + stlines, first_col + f.xls_start, set_format, format=f.format)
                         apply_cell(ws, cur_row + stlines, first_col + f.xls_start, set_borders)
+                        apply_cell(ws, cur_row + stlines, first_col + f.xls_start, set_fill, color=Color.LT_GRAY.value)
                     stlines += 1
 
             return cur_row + stlines
