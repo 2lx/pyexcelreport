@@ -4,7 +4,7 @@
 from xlsutils_apply import *
 from openpyxl.utils import get_column_letter
 
-from collections import namedtuple
+from recordclass import recordclass
 
 class XLSTableColumnInfo:
     """Структура для хранения информации одного столбца данных таблицы
@@ -15,14 +15,14 @@ class XLSTableColumnInfo:
         self.type       = data_type
         self.editable   = editable
 
-FieldStat = namedtuple('FieldStat', 'index format xls_start xls_end last_value last_value_row '\
-                                    'hide_condition hide_flag')
+FieldStruct = recordclass('FieldStat', 'index format xls_start xls_end last_value last_value_row '
+                                       'hide_condition hide_flag')
 
 class XLSTable:
     """Класс, инкапсулирующий информацию и методы отображения данных таблицы
     """
     def __init__(self, colinfo, data, row_height=30):
-        self._columns = colinfo
+        #  self._columns = colinfo
         self._data = data
 
         self._row_height = row_height
@@ -35,14 +35,14 @@ class XLSTable:
         index = 0
         xls_index = 0
         for coli in colinfo:
-            self._fields[coli.fieldname] = FieldStat(index=index,
-                                                     format=coli.type,
-                                                     xls_start=xls_index,
-                                                     xls_end=xls_index + coli.count - 1,
-                                                     last_value=None,
-                                                     last_value_row=None,
-                                                     hide_condition=None,
-                                                     hide_flag=None)
+            self._fields[coli.fieldname] = FieldStruct(index=index,
+                                                       format=coli.type,
+                                                       xls_start=xls_index,
+                                                       xls_end=xls_index + coli.count - 1,
+                                                       last_value=None,
+                                                       last_value_row=None,
+                                                       hide_condition=None,
+                                                       hide_flag=None)
             index += 1
             xls_index += coli.count
 
@@ -50,8 +50,8 @@ class XLSTable:
         self._merged_hierarchy = []
 
     def add_hide_column_condition(self, fieldname, cond_func):
-        self._fields[fieldname] = self._fields[fieldname]._replace(hide_condition=cond_func,
-                                                                   hide_flag=True)
+        self._fields[fieldname].hide_condition = cond_func
+        self._fields[fieldname].hide_flag = True
 
     def add_merge_column_hierarchy(self, field_hierarchy):
         self._merged_hierarchy = field_hierarchy
@@ -73,8 +73,8 @@ class XLSTable:
                     apply_range(ws, col.last_value_row, first_col + col.xls_start,
                                     cur_row - 1,        first_col + col.xls_end, set_merge)
                 if was_changed:
-                    self._fields[fieldname] = col._replace(last_value=new_value,
-                                                           last_value_row=cur_row)
+                    self._fields[fieldname].last_value = new_value
+                    self._fields[fieldname].last_value_row = cur_row
 
         cur_row = first_row
         for data_row in self._data:
@@ -85,12 +85,12 @@ class XLSTable:
                     apply_range(ws, cur_row, first_col + f.xls_start,
                                     cur_row, first_col + f.xls_end, set_merge)
 
+                # если печатаю числа, не выводить нулевые значения
                 if (f.format not in ['int', 'currency', '3digit']) or (data_row[f.index] != 0):
                     ws.cell(row=cur_row, column=first_col + f.xls_start).value = data_row[f.index]
 
-                if f.hide_condition is not None:
-                    if not f.hide_condition(data_row[f.index]):
-                        self._fields[k] = self._fields[k]._replace(hide_flag=False)
+                if (f.hide_condition is not None) and (not f.hide_condition(data_row[f.index])):
+                        self._fields[k].hide_flag = False
 
             _save_last_values_and_merge(data_row, cur_row)
             cur_row += 1
@@ -104,19 +104,16 @@ class XLSTable:
                 ws.column_dimensions[get_column_letter(first_col + i)].hidden = True
 
         # apply format and alignment
-        cur_col = first_col
-        for coli in self._columns:
-            if coli.type in ['int', 'currency', '3digit']:
-                apply_range(ws, first_row, cur_col, cur_row -1, cur_col,
-                        set_alignment, horizontal='right')
-                apply_range(ws, first_row, cur_col, cur_row -1, cur_col,
-                        set_format, format=coli.type)
+        for f in self._fields.values():
+            xlr = get_xlrange(first_row, first_col + f.xls_start, cur_row - 1, first_col + f.xls_end)
+            if f.format in ['int', 'currency', '3digit']:
+                apply_xlrange(ws, xlr, set_alignment, horizontal='right')
+                apply_xlrange(ws, xlr, set_format, format=f.format)
             else:
-                apply_range(ws, first_row, cur_col, cur_row -1, cur_col, set_alignment)
-            cur_col += coli.count
+                apply_xlrange(ws, xlr, set_alignment)
 
         # apply borders, outline, font
-        cr = get_xlrange(first_row, first_col, cur_row - 1, cur_col - 1)
+        cr = get_xlrange(first_row, first_col, cur_row - 1, first_col + self._col_count - 1)
         apply_xlrange(ws, cr, set_borders)
         apply_xlrange(ws, cr, set_outline, border_style='medium')
         apply_xlrange(ws, cr, set_font)
