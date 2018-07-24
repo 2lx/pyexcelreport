@@ -7,8 +7,8 @@ from openpyxl.worksheet.cell_range import CellRange
 from openpyxl.styles.borders import Border, Side
 from openpyxl.styles import Font, Color, Alignment, PatternFill
 
-def apply_cell(ws, start_row, start_col, f, *args, **kwargs):
-    f(ws, start_row, start_col, start_row, start_col, f(*args, **kwargs))
+def apply_cell(ws, start_row, start_col, f, **kwargs):
+    f(ws, start_row, start_col, start_row, start_col, **kwargs)
 
 def apply_range(ws, start_row, start_col, end_row, end_col, f, *args, **kwargs):
     if end_row < start_row: end_row, start_row = start_row, end_row

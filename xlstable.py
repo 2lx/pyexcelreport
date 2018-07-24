@@ -92,17 +92,24 @@ class XLSTable:
             fields = [self._fields[fn] for fn in self._hierarchy if self._fields[fn].subtotal and self._fields[fn].changed]
             for fch in fields:
                 if (fch.last_value_row is not None) and (fch.last_value_row != cur_row - 1):
-                    ws.row_dimensions[cur_row].height = 18
+                    ws.row_dimensions[cur_row + stlines].height = 18
+                    ws.cell(row=cur_row + stlines, column=first_col + fch.xls_start).value = 'Подитоги'
+                    apply_cell(ws, cur_row + stlines, first_col + fch.xls_start, set_alignment)
+                    apply_cell(ws, cur_row + stlines, first_col + fch.xls_start, set_font, bold=True)
+
                     for st in fch.subtotal:
                         f = self._fields[st]
                         if (f.xls_start - f.xls_end > 1):
                             apply_range(ws, cur_row + stlines, first_col + f.xls_start,
                                             cur_row + stlines, first_col + f.xls_end, set_merge)
-                        formulae = "=SUM({0:s}{1:d}:{0:s}{2:d})".format(
+                        formulae = "=SUBTOTAL(9,{0:s}{1:d}:{0:s}{2:d})".format(
                                 get_column_letter(first_col + f.xls_start),
                                 fch.last_value_row, cur_row - 1)
-                        print(formulae)
+                        #  print(formulae)
                         ws.cell(row=cur_row + stlines, column=first_col + f.xls_start).value = formulae
+                        apply_cell(ws, cur_row + stlines, first_col + f.xls_start, set_alignment, horizontal='right')
+                        apply_cell(ws, cur_row + stlines, first_col + f.xls_start, set_format, format=f.format)
+                        apply_cell(ws, cur_row + stlines, first_col + f.xls_start, set_borders)
                     stlines += 1
 
             return cur_row + stlines
@@ -115,7 +122,7 @@ class XLSTable:
 
             ws.row_dimensions[cur_row].height = self._row_height
 
-            for k, f in self._fields.items():
+            for fieldname, f in self._fields.items():
                 if (f.xls_start - f.xls_end > 1):
                     apply_range(ws, cur_row, first_col + f.xls_start,
                                     cur_row, first_col + f.xls_end, set_merge)
@@ -126,9 +133,25 @@ class XLSTable:
 
                 # обновляем флаг hide_flag чтобы скрыть в конце неиспользуемые колонки
                 if (f.hide_condition is not None) and (not f.hide_condition(data_row[f.findex])):
-                        self._fields[k].hide_flag = False
+                    self._fields[fieldname].hide_flag = False
 
             _after_line_processing(data_row, cur_row)
+
+            # apply format and alignment
+            for f in self._fields.values():
+                xlr = get_xlrange(cur_row, first_col + f.xls_start, cur_row, first_col + f.xls_end)
+                if f.format in ['int', 'currency', '3digit']:
+                    apply_xlrange(ws, xlr, set_alignment, horizontal='right')
+                    apply_xlrange(ws, xlr, set_format, format=f.format)
+                else:
+                    apply_xlrange(ws, xlr, set_alignment)
+
+            # apply borders, outline, font
+            cr = get_xlrange(cur_row, first_col, cur_row, first_col + self._col_count - 1)
+            apply_xlrange(ws, cr, set_borders)
+            #  #  apply_xlrange(ws, cr, set_outline, border_style='medium')
+            apply_xlrange(ws, cr, set_font)
+
             cur_row += 1
 
         _before_line_processing(None)
@@ -141,19 +164,10 @@ class XLSTable:
             for i in range(fstart, fend + 1):
                 ws.column_dimensions[get_column_letter(first_col + i)].hidden = True
 
-        # apply format and alignment
-        for f in self._fields.values():
-            xlr = get_xlrange(first_row, first_col + f.xls_start, cur_row - 1, first_col + f.xls_end)
-            if f.format in ['int', 'currency', '3digit']:
-                apply_xlrange(ws, xlr, set_alignment, horizontal='right')
-                apply_xlrange(ws, xlr, set_format, format=f.format)
-            else:
-                apply_xlrange(ws, xlr, set_alignment)
-
         # apply borders, outline, font
         cr = get_xlrange(first_row, first_col, cur_row - 1, first_col + self._col_count - 1)
-        apply_xlrange(ws, cr, set_borders)
+        #  apply_xlrange(ws, cr, set_borders)
         apply_xlrange(ws, cr, set_outline, border_style='medium')
-        apply_xlrange(ws, cr, set_font)
+        #  apply_xlrange(ws, cr, set_font)
 
         return cur_row
