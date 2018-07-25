@@ -4,7 +4,10 @@
 import locale
 import sys
 
-locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
+if sys.platform.startswith('win'):
+    locale.setlocale(locale.LC_ALL, 'rus_rus')
+else:
+    locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 from xlsreport import *
 
