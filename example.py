@@ -17,7 +17,7 @@ rep = XLSReport('Акт передачи образцов')
 tableheader = XLSTableHeader( columns=(
         THC( 'Артикул',         widths=[20] ),
         THC( 'Цвет ШП/Global',  widths=[20] ),
-        THC( 'Размеры',         struct=[ THC('р', widths=[ 7]) ]*13 ),
+        THC( 'Размеры, составной заголовок', struct=[ THC('р', widths=[ 7]) ]*13 ),
         #  THC( 'Размеры',         widths=[ 7]*13 ),
         THC( 'Номера коробок',  widths=[20] ),
         ) )
@@ -68,15 +68,15 @@ if sys.platform.startswith('win'):
 #    #  print(sqlquery)
 #    table_data = get_mssql_data(sqlquery, table_info)
 #else:
-    table_data = ( \
-        [ 'MSH05435', 'черный', 50, 0, 150, 100, 200, 0, 200, 0, 0, 0, 0, 0, 0,  '1-50' ],
-        [ 'MSH05435', 'черный', 50, 0, 150, 200, 268, 0,   0, 0, 0, 0, 0, 0, 0, '31-50' ],
-        [ 'MSH05436', 'белый',   0, 0, 150,   0, 220, 0,   0, 0, 0, 0, 0, 0, 0,  '1-50' ],
-        [ 'MSH05437', 'белый',   0, 0, 150, 100, 205, 0, 200, 0, 0, 0, 0, 0, 0,  '1-50' ],
-        [ 'MSH05437', 'черный',  0, 0, 150, 100, 205, 0, 200, 0, 0, 0, 0, 0, 0,  '1-50' ],
-        [ 'MSH05437', 'черный',  0, 0, 150, 100, 205, 0, 200, 0, 0, 0, 0, 0, 0,  '1-50' ],
-        [ 'MSH05437', 'красный',50, 0, 150, 100, 280, 0,   0, 0, 0, 0, 0, 0, 0,  '1-50' ],
-        [ 'MSH05437', 'желтый', 50, 0, 150, 200, 200, 0,   0, 0, 0, 0, 0, 0, 0,  '1-50' ] )
+    table_data = (
+        [ 'MSH05435', 'черный', 50, 0, 150, 100, 200, 0, 200, 0, 0, 0, 0, 0,   0,  '1-50' ],
+        [ 'MSH05435', 'черный', 50, 0, 150, 200, 268, 0,   0, 0, 0, 0, 0, 0,   0, '31-50' ],
+        [ 'MSH05436', 'белый',   0, 0, 150,   0, 220, 0,   0, 0, 0, 0, 0, 0,   0,  '1-50' ],
+        [ 'MSH05437', 'белый',   0, 0, 150, 100, 205, 0, 200, 0, 0, 0, 0, 0, 430,  '1-50' ],
+        [ 'MSH05437', 'черный',  0, 0, 150, 100, 205, 0, 200, 0, 0, 0, 0, 0,   0,  '1-50' ],
+        [ 'MSH05437', 'черный',  0, 0, 150, 100, 205, 0, 200, 0, 0, 0, 0, 0,   0,  '1-50' ],
+        [ 'MSH05437', 'красный',50, 0, 150, 100, 280, 0,   0, 0, 0, 0, 0, 0,   0,  '1-50' ],
+        [ 'MSH05437', 'желтый', 50, 0, 150, 200, 200, 0,   0, 0, 0, 0, 0, 0,   0,  '1-50' ] )
 
 table = XLSTable(table_info, table_data)
 
@@ -85,11 +85,25 @@ fn = lambda x: x == 0
 for i in range(1, 14):
     table.add_hide_column_condition("Sum{0:d}".format(i), fn)
 
-# указываю поля, которые участвуют в группировках равных значений, для подитога или подзаголовка
+# указываю поля, которые участвуют в группировках равных значений,
+# указываю поля с подитогами, указываю поля с подзаголовками
+# всё это указываю в порядке приоритета
+def my_header_func(ws, cur_row, first_col):
+    # в функции подзаголовка можно рисовать как обычно, и в том числе вызывать методы report
+    colheaders = [ THC("р. {0:d}".format(i)) for i in range(1, 14) ]
+    my_subtitle_header = XLSTableHeader( columns=[
+            THC('Составной подзаголовок', struct=colheaders)],
+            row_height=16 )
+
+    cur_row = rep.apply_tableheader(my_subtitle_header, first_row=cur_row + 1, first_col=first_col + 2)
+    return cur_row
+
 table.add_hierarchy_field('ArticleGlobalCode', merging=True,
-        subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'])
+        subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'],
+        subtitle=my_header_func)
 table.add_hierarchy_field('OItemColorName', merging=True,
         subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'])
+#        subtitle=my_header_func)
 
 # печатаю отчёт
 cur_row = rep.apply_table(table, first_row=cur_row)

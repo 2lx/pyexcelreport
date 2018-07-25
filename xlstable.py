@@ -125,6 +125,11 @@ class XLSTable:
             return cur_row + stlines
 
         def _make_headers(cur_row):
+            # ordering sensitive
+            fields = [self._fields[fn] for fn in self._hierarchy if self._fields[fn].subtitle and self._fields[fn].changed]
+            for fch in fields:
+                cur_row = fch.subtitle(ws, cur_row, first_col)
+
             return cur_row
 
         cur_row = first_row
@@ -132,7 +137,7 @@ class XLSTable:
             _before_line_processing(data_row)
             _merge_previous_rows(cur_row)
             cur_row = _make_subtotals(cur_row)
-  #          cur_row = _make_headers(cur_row)
+            cur_row = _make_headers(cur_row)
 
             ws.row_dimensions[cur_row].height = self._row_height
 
@@ -179,8 +184,6 @@ class XLSTable:
 
         # apply borders, outline, font
         cr = get_xlrange(first_row, first_col, cur_row - 1, first_col + self._col_count - 1)
-        #  apply_xlrange(ws, cr, set_borders)
         apply_xlrange(ws, cr, set_outline, border_style='medium')
-        #  apply_xlrange(ws, cr, set_font)
 
         return cur_row
