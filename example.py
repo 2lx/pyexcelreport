@@ -85,9 +85,7 @@ fn = lambda x: x == 0
 for i in range(1, 14):
     table.add_hide_column_condition("Sum{0:d}".format(i), fn)
 
-# указываю поля, которые участвуют в группировках равных значений,
-# указываю поля с подитогами, указываю поля с подзаголовками
-# всё это указываю в порядке приоритета
+# определяю функции для отрисовки подзаголовков таблицы
 def my_header_func(ws, cur_row, first_col):
     # в функции подзаголовка можно рисовать как обычно, и в том числе вызывать методы report
     colheaders = [ THC("р. {0:d}".format(i)) for i in range(1, 14) ]
@@ -99,9 +97,13 @@ def my_header_func(ws, cur_row, first_col):
     return cur_row
 
 def my_second_header(ws, cur_row, first_col):
+    # просто вывожу надпись
     return rep.apply_label(XLSLabel('Подзаголовок цветомодели', LabelHeading.h3),
                           first_row=cur_row, first_col=first_col + 2, col_count=13)
 
+# указываю поля, которые участвуют в группировках равных значений,
+# указываю поля с подитогами, указываю поля с подзаголовками
+# всё это указываю в порядке приоритета
 table.add_hierarchy_field('ArticleGlobalCode', merging=True,
         subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'],
         subtitle=my_header_func)
@@ -109,7 +111,7 @@ table.add_hierarchy_field('OItemColorName', merging=True,
         subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'],
         subtitle=my_second_header)
 
-# печатаю отчёт
+# печатаю таблицу в отчёт
 cur_row = rep.apply_table(table, first_row=cur_row)
 
 # открываю отчет в программе по умолчанию для .xls
