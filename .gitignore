@@ -2,3 +2,4 @@ __pycache__/*
 tags
 .arguments
 config.py
+goods_*

@@ -7,10 +7,10 @@ from xlscolor import *
 
 from recordclass import recordclass
 
-class XLSTableColumnInfo:
+class XLSTableField:
     """Структура для хранения информации одного столбца данных таблицы
     """
-    def __init__(self, fieldname, format = 'string', col_count=1, editable=False):
+    def __init__(self, fieldname, format='string', col_count=1, editable=False):
         self.fname    = fieldname
         self.ccount   = col_count
         self.format   = format
@@ -24,6 +24,9 @@ class XLSTable:
     """Класс, инкапсулирующий информацию и методы отображения данных таблицы
     """
     def __init__(self, colinfo, data, row_height=30):
+        if len(data) > 0:
+            assert len(colinfo) == len(data[0]), "количество полей в структуре таблицы не совпадает с фактическим количеством"
+
         self._fields = dict()
         findex = 0
         cindex = 0

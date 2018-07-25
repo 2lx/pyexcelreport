@@ -8,8 +8,8 @@ locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 from xlsreport import *
 
-THC=XLSTableHeaderColumn
-TCI=XLSTableColumnInfo
+THC = XLSTableHeaderColumn
+TF  = XLSTableField
 
 rep = XLSReport('Акт передачи образцов')
 
@@ -24,7 +24,9 @@ tableheader = XLSTableHeader( columns=(
         THC( 'Номера коробок',  widths=[20] ),
         ) )
 
+# получаем информацию о количестве Excel-колонок в отчете
 max_col = tableheader.column_count
+# настраивать ширину столбцов листа можно через информацию в шапке таблицы (обычно это верхняя шапка)
 rep.apply_column_widths(tableheader)
 
 # добавляю информациюю о сгенерированном отчёте
@@ -44,22 +46,22 @@ cur_row = rep.apply_tableheader(tableheader, first_row=cur_row)
 
 # задаю структуру контекста отчёта
 table_info = (\
-        TCI('ArticleGlobalCode',    'string', 1),
-        TCI('OItemColorName',       'string', 1),
-        TCI('Sum1',                 'int',    1),
-        TCI('Sum2',                 'int',    1),
-        TCI('Sum3',                 'int',    1),
-        TCI('Sum4',                 'int',    1),
-        TCI('Sum5',                 'int',    1),
-        TCI('Sum6',                 'int',    1),
-        TCI('Sum7',                 'int',    1),
-        TCI('Sum8',                 'int',    1),
-        TCI('Sum9',                 'int',    1),
-        TCI('Sum10',                'int',    1),
-        TCI('Sum11',                'int',    1),
-        TCI('Sum12',                'int',    1),
-        TCI('Sum13',                'int',    1),
-        TCI('',                     'string', 1),
+        TF('ArticleGlobalCode',    'string', 1),
+        TF('OItemColorName',       'string', 1),
+        TF('Sum1',                 'int',    1),
+        TF('Sum2',                 'int',    1),
+        TF('Sum3',                 'int',    1),
+        TF('Sum4',                 'int',    1),
+        TF('Sum5',                 'int',    1),
+        TF('Sum6',                 'int',    1),
+        TF('Sum7',                 'int',    1),
+        TF('Sum8',                 'int',    1),
+        TF('Sum9',                 'int',    1),
+        TF('Sum10',                'int',    1),
+        TF('Sum11',                'int',    1),
+        TF('Sum12',                'int',    1),
+        TF('Sum13',                'int',    1),
+        TF('',                     'string', 1),
         )
 
 # указываю данные для контекста
