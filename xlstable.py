@@ -48,7 +48,7 @@ class XLSTable:
         self._fields[fieldname].hide_condition = cond_func
         self._fields[fieldname].hide_flag = True
 
-    def add_hierarchy_field(self, fieldname, merging=False, subtitle=None, subtotal=None):
+    def hierarchy_append(self, fieldname, merging=False, subtitle=None, subtotal=None):
         self._hierarchy.append(fieldname)
         self._fields[fieldname].merging = merging
         self._fields[fieldname].subtitle = subtitle

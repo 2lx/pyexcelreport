@@ -14,6 +14,8 @@ TCI=XLSTableColumnInfo
 rep = XLSReport('Акт передачи образцов')
 
 # задаю структуру шапки отчёта
+# есть возможность делать столбец шириной неск. столбцов excel, для этого список widths (а не одно значение)
+# поле widths служит также для установки ширины колонок на листе (устанавливается в ширине среднего символа)
 tableheader = XLSTableHeader( columns=(
         THC( 'Артикул',         widths=[20] ),
         THC( 'Цвет ШП/Global',  widths=[20] ),
@@ -104,10 +106,10 @@ def my_second_header(ws, cur_row, first_col):
 # указываю поля, которые участвуют в группировках равных значений,
 # указываю поля с подитогами, указываю поля с подзаголовками
 # всё это указываю в порядке приоритета
-table.add_hierarchy_field('ArticleGlobalCode', merging=True,
+table.hierarchy_append('ArticleGlobalCode', merging=True,
         subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'],
         subtitle=my_header_func)
-table.add_hierarchy_field('OItemColorName', merging=True,
+table.hierarchy_append('OItemColorName', merging=True,
         subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'],
         subtitle=my_second_header)
 
