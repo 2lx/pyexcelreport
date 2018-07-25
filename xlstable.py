@@ -18,7 +18,7 @@ class XLSTableColumnInfo:
 
 FieldStruct = recordclass('FieldStruct', 'findex xls_start xls_end format '
                                          'last_value last_value_row changed '
-                                         'hide_condition hide_flag merging preheader subtotal')
+                                         'hide_condition hide_flag merging subtitle subtotal')
 
 class XLSTable:
     """Класс, инкапсулирующий информацию и методы отображения данных таблицы
@@ -34,7 +34,7 @@ class XLSTable:
                         format=ci.format,
                         last_value=None, last_value_row=None, changed=False,
                         hide_condition=None, hide_flag=None,
-                        merging=False, preheader=None, subtotal=None)
+                        merging=False, subtitle=None, subtotal=None)
             findex += 1
             cindex += ci.ccount
 
@@ -48,10 +48,10 @@ class XLSTable:
         self._fields[fieldname].hide_condition = cond_func
         self._fields[fieldname].hide_flag = True
 
-    def add_hierarchy_field(self, fieldname, merging=False, preheader=None, subtotal=None):
+    def add_hierarchy_field(self, fieldname, merging=False, subtitle=None, subtotal=None):
         self._hierarchy.append(fieldname)
         self._fields[fieldname].merging = merging
-        self._fields[fieldname].preheader = preheader
+        self._fields[fieldname].subtitle = subtitle
         self._fields[fieldname].subtotal = subtotal
 
     def apply(self, ws, first_row, first_col):
@@ -61,8 +61,10 @@ class XLSTable:
             """ставим флаг changed если значение поля в структуре hierarchy поменяло свое значение
             """
             was_changed = False
-            fielddict = {fn:self._fields[fn] for fn in self._hierarchy}.items()
-            for fieldname, f in fielddict:
+            # ordering sensitive
+            fieldlist = [fn for fn in self._hierarchy]
+            for fieldname in fieldlist:
+                f = self._fields[fieldname]
                 if (row is None) or (row[f.findex] != f.last_value):
                     was_changed = True
                 if was_changed:
@@ -71,8 +73,9 @@ class XLSTable:
         def _after_line_processing(row, cur_row):
             """сохраняем инфо о последних значениях для всех полей в структуре _hierarchy
             """
-            fielddict = {fn:self._fields[fn] for fn in self._hierarchy if self._fields[fn].changed}.items()
-            for fieldname, f in fielddict:
+            fieldlist = [fn for fn in self._hierarchy if self._fields[fn].changed]
+            for fieldname in fieldlist:
+                f = self._fields[fieldname]
                 self._fields[fieldname].last_value = row[f.findex] if row else None
                 self._fields[fieldname].last_value_row = cur_row
                 self._fields[fieldname].changed = False
@@ -92,6 +95,7 @@ class XLSTable:
             """делаем подитоги
             """
             stlines = 0
+            # ordering sensitive
             fields = [self._fields[fn] for fn in reversed(self._hierarchy) if self._fields[fn].subtotal and self._fields[fn].changed]
             for fch in fields:
                 if (fch.last_value_row is not None) and (fch.last_value_row != cur_row - 1):
@@ -105,7 +109,7 @@ class XLSTable:
                     for st in fch.subtotal:
                         f = self._fields[st]
                         fcol1, fcol2 = first_col + f.xls_start, first_col + f.xls_end
-                        if (f.xls_start - f.xls_end > 1):
+                        if (fcol1 - fcol2 > 1):
                             apply_range(ws, _row, fcol1, _row, fcol2, set_merge)
 
                         formulae = "=SUBTOTAL(9,{0:s}{1:d}:{0:s}{2:d})".format(
@@ -120,11 +124,15 @@ class XLSTable:
 
             return cur_row + stlines
 
+        def _make_headers(cur_row):
+            return cur_row
+
         cur_row = first_row
         for data_row in self._data:
             _before_line_processing(data_row)
             _merge_previous_rows(cur_row)
             cur_row = _make_subtotals(cur_row)
+  #          cur_row = _make_headers(cur_row)
 
             ws.row_dimensions[cur_row].height = self._row_height
 

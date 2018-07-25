@@ -78,7 +78,7 @@ if sys.platform.startswith('win'):
         [ 'MSH05437', 'красный',50, 0, 150, 100, 280, 0,   0, 0, 0, 0, 0, 0, 0,  '1-50' ],
         [ 'MSH05437', 'желтый', 50, 0, 150, 200, 200, 0,   0, 0, 0, 0, 0, 0, 0,  '1-50' ] )
 
-table = XLSTable(table_info, table_data )
+table = XLSTable(table_info, table_data)
 
 # указываю столбцы, которые можно скрыть если все значения в контексте нулевые
 fn = lambda x: x == 0
