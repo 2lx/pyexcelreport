@@ -42,7 +42,7 @@ if sys.platform.startswith('win'):
         for row in cursor:
             row_data = ()
             for ti in table_info:
-                row_data += (row[ti.fieldname],) if ti.fieldname != '' else ('',)
+                row_data += (row[ti.fname],) if ti.fname != '' else ('',)
             table_data.append(row_data)
 
         conn.close

@@ -62,12 +62,12 @@ table_info = (\
 
 # указываю данные для контекста
 if sys.platform.startswith('win'):
-    sqlprocedure = "ORDERS.dbo.OMS_TRANSPORT_ReportPackageGlobalInvoiceList"
-    sqlparamlist = ( "{53DAD87F-8C0F-4178-9A27-9F686E44A8FD}", )
-    sqlquery = "EXEC {0:s} {1:s}".format(sqlprocedure, ", ".join(map(maybe_sqlquoted, sqlparamlist)))
-    #  print(sqlquery)
-    table_data = get_mssql_data(sqlquery, table_info)
-else:
+#    sqlprocedure = "ORDERS.dbo.OMS_TRANSPORT_ReportPackageGlobalInvoiceList"
+#    sqlparamlist = ( "{53DAD87F-8C0F-4178-9A27-9F686E44A8FD}", )
+#    sqlquery = "EXEC {0:s} {1:s}".format(sqlprocedure, ", ".join(map(maybe_sqlquoted, sqlparamlist)))
+#    #  print(sqlquery)
+#    table_data = get_mssql_data(sqlquery, table_info)
+#else:
     table_data = ( \
         [ 'MSH05435', 'черный', 50, 0, 150, 100, 200, 0, 200, 0, 0, 0, 0, 0, 0,  '1-50' ],
         [ 'MSH05435', 'черный', 50, 0, 150, 200, 268, 0,   0, 0, 0, 0, 0, 0, 0, '31-50' ],
