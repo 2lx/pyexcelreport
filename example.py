@@ -92,18 +92,22 @@ def my_header_func(ws, cur_row, first_col):
     # в функции подзаголовка можно рисовать как обычно, и в том числе вызывать методы report
     colheaders = [ THC("р. {0:d}".format(i)) for i in range(1, 14) ]
     my_subtitle_header = XLSTableHeader( columns=[
-            THC('Составной подзаголовок', struct=colheaders)],
+            THC('Составной подзаголовок модели', struct=colheaders)],
             row_height=16 )
 
     cur_row = rep.apply_tableheader(my_subtitle_header, first_row=cur_row + 1, first_col=first_col + 2)
     return cur_row
 
+def my_second_header(ws, cur_row, first_col):
+    return rep.apply_label(XLSLabel('Подзаголовок цветомодели', LabelHeading.h3),
+                          first_row=cur_row, first_col=first_col + 2, col_count=13)
+
 table.add_hierarchy_field('ArticleGlobalCode', merging=True,
         subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'],
         subtitle=my_header_func)
 table.add_hierarchy_field('OItemColorName', merging=True,
-        subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'])
-#        subtitle=my_header_func)
+        subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'],
+        subtitle=my_second_header)
 
 # печатаю отчёт
 cur_row = rep.apply_table(table, first_row=cur_row)
