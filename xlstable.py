@@ -10,13 +10,14 @@ from recordclass import recordclass
 class XLSTableField:
     """Структура для хранения информации одного столбца данных таблицы
     """
-    def __init__(self, fieldname, format='string', col_count=1, editable=False):
+    def __init__(self, fieldname, format='string', col_count=1, editable=False, hidden=False):
         self.fname    = fieldname
         self.ccount   = col_count
         self.format   = format
         self.editable = editable
+        self.hidden   = hidden
 
-FieldStruct = recordclass('FieldStruct', 'findex xls_start xls_end format '
+FieldStruct = recordclass('FieldStruct', 'findex xls_start xls_end format hidden '
                                          'last_value last_value_row changed '
                                          'hide_condition hide_flag merging subtitle subtotal')
 
@@ -34,17 +35,18 @@ class XLSTable:
             self._fields[ci.fname] = FieldStruct(
                         findex=findex,
                         xls_start=cindex, xls_end=cindex + ci.ccount - 1,
-                        format=ci.format,
+                        format=ci.format, hidden=ci.hidden,
                         last_value=None, last_value_row=None, changed=False,
                         hide_condition=None, hide_flag=None,
                         merging=False, subtitle=None, subtotal=None)
             findex += 1
-            cindex += ci.ccount
+            if not ci.hidden:
+                cindex += ci.ccount
 
         self._data = data
         self._hierarchy = []
         self._row_height = row_height
-        self._col_count = sum(ci.ccount for ci in colinfo)
+        self._col_count = sum([ci.ccount for ci in colinfo if not ci.hidden])
         self._row_count = len(data)
 
     def add_hide_column_condition(self, fieldname, cond_func):
@@ -127,11 +129,17 @@ class XLSTable:
 
             return cur_row + stlines
 
-        def _make_headers(cur_row):
+        def _make_headers(cur_row, data_row):
             # ordering sensitive
             fields = [self._fields[fn] for fn in self._hierarchy if self._fields[fn].subtitle and self._fields[fn].changed]
-            for fch in fields:
-                cur_row = fch.subtitle(ws, cur_row, first_col)
+
+            if fields:
+                data_dict_row = dict()
+                for fn, f in self._fields.items():
+                    data_dict_row[fn] = data_row[f.findex]
+
+                for fch in fields:
+                    cur_row = fch.subtitle(ws, data_dict_row, cur_row, first_col)
 
             return cur_row
 
@@ -140,11 +148,13 @@ class XLSTable:
             _before_line_processing(data_row)
             _merge_previous_rows(cur_row)
             cur_row = _make_subtotals(cur_row)
-            cur_row = _make_headers(cur_row)
+            cur_row = _make_headers(cur_row, data_row)
 
             ws.row_dimensions[cur_row].height = self._row_height
 
             for fieldname, f in self._fields.items():
+                if f.hidden: continue
+
                 if (f.xls_start - f.xls_end > 1):
                     apply_range(ws, cur_row, first_col + f.xls_start,
                                     cur_row, first_col + f.xls_end, set_merge)
@@ -161,6 +171,8 @@ class XLSTable:
 
             # apply format and alignment
             for f in self._fields.values():
+                if f.hidden: continue
+
                 xlr = get_xlrange(cur_row, first_col + f.xls_start, cur_row, first_col + f.xls_end)
                 if f.format in ['int', 'currency', '3digit']:
                     apply_xlrange(ws, xlr, set_alignment, horizontal='right')
@@ -180,7 +192,7 @@ class XLSTable:
         cur_row = _make_subtotals(cur_row)
 
         # скрываем все колонки, для которых не выполнились условия
-        fields = [[fn.xls_start, fn.xls_end] for fn in self._fields.values() if fn.hide_flag]
+        fields = [[f.xls_start, f.xls_end] for f in self._fields.values() if f.hide_flag and not f.hidden]
         for fstart, fend in fields:
             for i in range(fstart, fend + 1):
                 ws.column_dimensions[get_column_letter(first_col + i)].hidden = True
