@@ -49,8 +49,10 @@ class XLSReport():
         print("Opening file '{0:s}'...".format(newfilename))
         open_file(newfilename)
 
+    def apply_column_widths(self, tableheader, first_col=1):
+        tableheader.apply_widths(self._wb.active, first_col)
 
-    def apply_preamble(self, max_col):
+    def print_preamble(self, max_col):
         self._ws.row_dimensions[1].height = 14
         self._ws.merge_cells(start_row=1, start_column=1,
                              end_row=1,   end_column=max_col)
@@ -61,17 +63,13 @@ class XLSReport():
         apply_range(self._ws, 1, 1, 1, max_col, set_alignment, horizontal='right', vertical='top')
         return 2
 
-
-    def apply_label(self, label, first_row, first_col=1, col_count=1):
+    def print_label(self, label, first_row, first_col=1, col_count=1):
         label.apply(self._wb.active, first_row, first_col, col_count)
         return first_row + 1
 
-    def apply_tableheader(self, tableheader, first_row, first_col=1):
+    def print_tableheader(self, tableheader, first_row, first_col=1):
         return tableheader.apply(self._wb.active, first_row, first_col)
 
-    def apply_column_widths(self, tableheader, first_col=1):
-        tableheader.apply_widths(self._wb.active, first_col)
-
-    def apply_table(self, table, first_row, first_col=1):
+    def print_table(self, table, first_row, first_col=1):
         return table.apply(self._wb.active, first_row, first_col)
 
