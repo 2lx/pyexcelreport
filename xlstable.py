@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import sys
+
 from xlsutils_apply import *
 from openpyxl.utils import get_column_letter
 from xlscolor import *
@@ -145,7 +147,11 @@ class XLSTable:
             return cur_row
 
         cur_row = first_row
+        data_row_number = 0
         for data_row in self._data:
+            sys.stdout.write("\rИдёт форматирование таблицы {0:0=2d}%".format(data_row_number * 100 // self._row_count ))
+            sys.stdout.flush()
+
             _before_line_processing(data_row)
             _merge_previous_rows(cur_row)
             cur_row = _make_subtotals(cur_row)
@@ -187,6 +193,7 @@ class XLSTable:
             apply_xlrange(ws, cr, set_font)
 
             cur_row += 1
+            data_row_number += 1
 
         _before_line_processing(None)
         _merge_previous_rows(cur_row)

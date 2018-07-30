@@ -44,7 +44,7 @@ class MSSql():
         """
         cursor = self.conn.cursor(as_dict=True)
 
-        print("querying {0:s}".format(sqlquery))
+        print("Выполняется запрос: '{0:s}'".format(sqlquery))
         cursor.execute(sqlquery)
         table_data = []
 
@@ -61,7 +61,7 @@ class MSSql():
         """
         cursor = self.conn.cursor(as_dict=True)
 
-        print("querying {0:s}".format(sqlquery))
+        print("Выполняется запрос: '{0:s}'".format(sqlquery))
         cursor.execute(sqlquery)
         dict_data = []
 
