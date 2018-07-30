@@ -30,11 +30,11 @@ class MSSql():
                        user=config.db_login,
                        password=config.db_password,
                        database=config.db_catalog):
-        self.conn = pymssql.connect( server=server,
-                                user=user,
-                                password=password,
-                                database=database,
-                                autocommit=True)
+        self.conn = pymssql.connect(server=server,
+                                    user=user,
+                                    password=password,
+                                    database=database,
+                                    autocommit=True)
 
     def __del__(self):
         self.conn.close
