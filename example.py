@@ -14,7 +14,7 @@ from xlsreport import *
 THC = XLSTableHeaderColumn
 TF  = XLSTableField
 
-rep = XLSReport('Акт передачи образцов')
+rep = XLSReport('Акт передачи образцов', print_setup=PrintSetup.PortraitW1)
 
 # задаю структуру шапки отчёта
 # есть возможность делать столбец шириной неск. столбцов excel, для этого список widths (а не одно значение)
@@ -23,7 +23,6 @@ tableheader = XLSTableHeader( columns=(
         THC( 'Артикул',         widths=[20] ),
         THC( 'Цвет ШП/Global',  widths=[20] ),
         THC( 'Размеры, составной заголовок', struct=[ THC('р', widths=[ 7]) ]*13 ),
-        #  THC( 'Размеры',         widths=[ 7]*13 ),
         THC( 'Номера коробок',  widths=[20] ),
         ) )
 
@@ -33,19 +32,19 @@ max_col = tableheader.column_count
 rep.apply_column_widths(tableheader)
 
 # добавляю информациюю о сгенерированном отчёте
-cur_row = rep.apply_preamble(max_col)
+cur_row = rep.print_preamble(max_col)
 
 # добавляю заголовок отчёта
-cur_row = rep.apply_label(XLSLabel('Заявка. Прибыла ТЕ такого то числа, а ещё прибыла Партия', LabelHeading.h1),
+cur_row = rep.print_label(XLSLabel('Заявка. Прибыла ТЕ такого то числа, а ещё прибыла Партия', LabelHeading.h1),
                           first_row=cur_row, col_count=max_col)
 # вывожу доп. информационные поля
-rep.apply_label(XLSLabel('От кого: склад "Распределение"', LabelHeading.h5),
+rep.print_label(XLSLabel('От кого: склад "Распределение"', LabelHeading.h5),
                           first_row=cur_row, col_count=6)
-cur_row = rep.apply_label(XLSLabel('Кому: склад "ШП технологи"', LabelHeading.h5),
+cur_row = rep.print_label(XLSLabel('Кому: склад "ШП технологи"', LabelHeading.h5),
                           first_row=cur_row, first_col=7, col_count=max_col - 7 + 1)
 
 # печатаю шапку отчёта
-cur_row = rep.apply_tableheader(tableheader, first_row=cur_row)
+cur_row = rep.print_tableheader(tableheader, first_row=cur_row)
 
 # задаю структуру контекста отчёта
 table_info = (\
@@ -93,19 +92,19 @@ for i in range(1, 14):
     table.add_hide_column_condition("Sum{0:d}".format(i), fn)
 
 # определяю функции для отрисовки подзаголовков таблицы
-def my_header_func(ws, cur_row, first_col):
+def my_header_func(ws, row_data, cur_row, first_col):
     # в функции подзаголовка можно рисовать как обычно, и в том числе вызывать методы report
     colheaders = [ THC("р. {0:d}".format(i)) for i in range(1, 14) ]
     my_subtitle_header = XLSTableHeader( columns=[
             THC('Составной подзаголовок модели', struct=colheaders)],
             row_height=16 )
 
-    cur_row = rep.apply_tableheader(my_subtitle_header, first_row=cur_row + 1, first_col=first_col + 2)
+    cur_row = rep.print_tableheader(my_subtitle_header, first_row=cur_row + 1, first_col=first_col + 2)
     return cur_row
 
-def my_second_header(ws, cur_row, first_col):
+def my_second_header(ws, row_data, cur_row, first_col):
     # просто вывожу надпись
-    return rep.apply_label(XLSLabel('Подзаголовок цветомодели', LabelHeading.h3),
+    return rep.print_label(XLSLabel('Подзаголовок цветомодели', LabelHeading.h3),
                           first_row=cur_row, first_col=first_col + 2, col_count=13)
 
 # указываю поля, которые участвуют в группировках равных значений,
@@ -119,7 +118,7 @@ table.hierarchy_append('OItemColorName', merging=True,
         subtitle=my_second_header)
 
 # печатаю таблицу в отчёт
-cur_row = rep.apply_table(table, first_row=cur_row)
+cur_row = rep.print_table(table, first_row=cur_row)
 
 # открываю отчет в программе по умолчанию для .xls
 rep.launch_excel()
