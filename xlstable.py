@@ -195,6 +195,8 @@ class XLSTable:
             cur_row += 1
             data_row_number += 1
 
+        sys.stdout.write("\n")
+
         _before_line_processing(None)
         _merge_previous_rows(cur_row)
         cur_row = _make_subtotals(cur_row)
