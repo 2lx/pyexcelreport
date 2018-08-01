@@ -128,6 +128,9 @@ class XLSTable:
                         apply_cell(ws, _row, fcol1, set_format, format=f.format)
                         apply_cell(ws, _row, fcol1, set_borders)
                         apply_cell(ws, _row, fcol1, set_fill, color=Color.LT_GRAY.value)
+
+                    for i in range(fch.last_value_row, cur_row + stlines):
+                        ws.row_dimensions[i].outlineLevel += 1
                     stlines += 1
 
             return cur_row + stlines
