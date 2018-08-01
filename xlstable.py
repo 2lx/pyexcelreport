@@ -22,7 +22,7 @@ class XLSTableField:
 
 FieldStruct = recordclass('FieldStruct', 'findex xls_start xls_end format hidden '
                                          'last_value last_value_row changed '
-                                         'hide_condition hide_flag merging subtitle subtotal')
+                                         'hide_condition hide_flag merging subtitle subtitle_rowcount subtotal')
 
 class XLSTable:
     """Класс, инкапсулирующий информацию и методы отображения данных таблицы
@@ -41,7 +41,7 @@ class XLSTable:
                         format=ci.format, hidden=ci.hidden,
                         last_value=None, last_value_row=None, changed=False,
                         hide_condition=None, hide_flag=None,
-                        merging=False, subtitle=None, subtotal=None)
+                        merging=False, subtitle=None, subtitle_rowcount=0, subtotal=None)
             findex += 1
             if not ci.hidden:
                 cindex += ci.ccount
@@ -56,11 +56,12 @@ class XLSTable:
         self._fields[fieldname].hide_condition = cond_func
         self._fields[fieldname].hide_flag = True
 
-    def hierarchy_append(self, fieldname, merging=False, subtitle=None, subtotal=None):
+    def hierarchy_append(self, fieldname, merging=False, subtitle=None, subtotal=None, subtitle_rowcount=0):
         self._hierarchy.append(fieldname)
         self._fields[fieldname].merging = merging
         self._fields[fieldname].subtitle = subtitle
         self._fields[fieldname].subtotal = subtotal
+        self._fields[fieldname].subtitle_rowcount = subtitle_rowcount
 
     def group_by_data(self, colinfo, hierarchy, sums):
         # TODO: asserts
@@ -152,7 +153,7 @@ class XLSTable:
                         apply_cell(ws, _row, fcol1, set_borders)
                         apply_cell(ws, _row, fcol1, set_fill, color=Color.LT_GRAY.value)
 
-                    for i in range(fch.last_value_row, cur_row + stlines):
+                    for i in range(fch.last_value_row - fch.subtitle_rowcount, cur_row + stlines):
                         ws.row_dimensions[i].outlineLevel += 1
                     stlines += 1
 
