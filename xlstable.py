@@ -109,10 +109,11 @@ class XLSTable:
                     _row, fchcol = cur_row + stlines, first_col + fch.xls_start
 
                     ws.row_dimensions[_row].height = 18
-                    if not fch.hidden:
-                        ws.cell(row=_row, column=fchcol).value = 'Подитоги'
-                        apply_cell(ws, _row, fchcol, set_alignment)
-                        apply_cell(ws, _row, fchcol, set_font, bold=True)
+
+                    _label_col = fchcol if not fch.hidden else 1
+                    ws.cell(row=_row, column=fchcol).value = "Σ '{0:s}'".format(str(fch.last_value))
+                    apply_cell(ws, _row, fchcol, set_alignment)
+                    apply_cell(ws, _row, fchcol, set_font, bold=True)
 
                     for st in fch.subtotal:
                         f = self._fields[st]
