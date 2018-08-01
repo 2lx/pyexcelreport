@@ -73,12 +73,15 @@ class XLSTable:
 
         table_total_data=[]
         for key, rows in itertools.groupby(table_data, key_func):
+            stored_rows = list(rows)
             data_row = []
             for ci in colinfo:
                 if ci.fname in hierarchy:
                     data_row.append(key[hierarchy.index(ci.fname)][1])
-                if ci.fname in sums:
-                    data_row.append(sum(r[self._fields[ci.fname].findex] for r in rows))
+                elif ci.fname in sums:
+                    cindex = self._fields[ci.fname].findex
+                    # TODO: refactor to zip
+                    data_row.append(sum(r[cindex] for r in stored_rows))
             table_total_data.append(tuple(data_row))
         return table_total_data
 
