@@ -46,7 +46,7 @@ class XLSReport():
         newfilename = temporary_file(templatename)
         self._wb.save(newfilename)
 
-        print("Opening file '{0:s}'...".format(newfilename))
+        print("Открытие файла '{0:s}'...".format(newfilename))
         open_file(newfilename)
 
     def apply_column_widths(self, tableheader, first_col=1):
@@ -72,4 +72,3 @@ class XLSReport():
 
     def print_table(self, table, first_row, first_col=1):
         return table.apply(self._wb.active, first_row, first_col)
-
