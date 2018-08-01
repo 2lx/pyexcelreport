@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import itertools
 
 from xlsutils_apply import *
 from openpyxl.utils import get_column_letter
@@ -61,6 +62,26 @@ class XLSTable:
         self._fields[fieldname].subtitle = subtitle
         self._fields[fieldname].subtotal = subtotal
 
+    def group_by_data(self, colinfo, hierarchy, sums):
+        # TODO: asserts
+        hier_indexes = [self._fields[fname].findex for fname in hierarchy]
+        check_None_func = lambda d: d if d is not None else ''
+        key_func = lambda d: tuple([check_None_func(d[i]) for i in hier_indexes])
+
+        table_data = copy(self._data)
+        table_data.sort(key=key_func)
+
+        table_total_data=[]
+        for key, rows in itertools.groupby(table_data, key_func):
+            data_row = []
+            for ci in colinfo:
+                if ci.fname in hierarchy:
+                    data_row.append(key[hierarchy.index(ci.fname)])
+                if ci.fname in sums:
+                    data_row.append(sum(r[self._fields[ci.fname].findex] for r in rows))
+            table_total_data.append(tuple(data_row))
+        return table_total_data
+
     def apply(self, ws, first_row, first_col):
         """Отображает непосредственно в XLS данные таблицы
         """
@@ -110,6 +131,7 @@ class XLSTable:
 
                     ws.row_dimensions[_row].height = 18
 
+                    # если подитоги по невидимому столбцу, печатаем заголовок в первом столбце
                     _label_col = fchcol if not fch.hidden else 1
                     ws.cell(row=_row, column=fchcol).value = "Σ '{0:s}'".format(str(fch.last_value))
                     apply_cell(ws, _row, fchcol, set_alignment)
