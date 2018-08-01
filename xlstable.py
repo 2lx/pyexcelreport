@@ -66,8 +66,7 @@ class XLSTable:
     def group_by_data(self, colinfo, hierarchy, sums):
         # TODO: asserts
         hier_indexes = [self._fields[fname].findex for fname in hierarchy]
-        check_None_func = lambda d: d if d is not None else ''
-        key_func = lambda d: tuple([check_None_func(d[i]) for i in hier_indexes])
+        key_func = lambda d: tuple([(d[i] is None, d[i]) for i in hier_indexes])
 
         table_data = copy(self._data)
         table_data.sort(key=key_func)
@@ -77,7 +76,7 @@ class XLSTable:
             data_row = []
             for ci in colinfo:
                 if ci.fname in hierarchy:
-                    data_row.append(key[hierarchy.index(ci.fname)])
+                    data_row.append(key[hierarchy.index(ci.fname)][1])
                 if ci.fname in sums:
                     data_row.append(sum(r[self._fields[ci.fname].findex] for r in rows))
             table_total_data.append(tuple(data_row))
