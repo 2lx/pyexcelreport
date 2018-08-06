@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from xlstable import *
+from .xlstable import *
 import re
 import datetime
 import sys
@@ -23,7 +23,7 @@ def maybe_sqlquoted(param):
 
 
 import pymssql
-import config
+from . import config
 
 class MSSql():
     def __init__(self, server=config.mssql_server,

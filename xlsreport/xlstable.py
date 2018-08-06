@@ -4,9 +4,9 @@
 import sys
 import itertools
 
-from xlsutils_apply import *
 from openpyxl.utils import get_column_letter
-from xlscolor import *
+from .xlsutils_apply import *
+from .xlscolor import *
 
 from recordclass import recordclass
 

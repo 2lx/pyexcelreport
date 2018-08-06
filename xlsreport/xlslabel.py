@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from xlsutils_apply import *
+from .xlsutils_apply import *
 from enum import Enum
 from collections import namedtuple
 

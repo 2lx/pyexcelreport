@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from xlsutils import *
-from xlsutils_apply import *
-from xlscolor import *
+from .xlsutils import *
+from .xlsutils_apply import *
+from .xlscolor import *
 from openpyxl.utils import get_column_letter
 
 class XLSTableHeaderColumn:
