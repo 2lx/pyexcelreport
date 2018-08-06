@@ -1,5 +1,5 @@
 __pycache__/*
+*/__pycache__/*
 tags
 .arguments
-config.py
-goods_*
+xlsreport/config.py
