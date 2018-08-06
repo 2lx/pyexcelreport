@@ -39,6 +39,12 @@ class XLSReport():
         self.protection = protection
         self._ws.protection.sheet = protection
 
+    def append_sheet(self, sheet_name='Новый лист', print_setup=PrintSetup.LandscapeW1):
+        """создает в конце книги еще один лист, устанавливает его параметры для печати
+        """
+        self._ws = sheet_create(self._wb, sheet_name)
+        sheet_print_setup(self._ws, print_setup.value.orientation, print_setup.value.pages_width)
+        self._ws.protection.sheet = self.protection
 
     def launch_excel(self, templatename='sample'):
         """Запускает программу по умолчанию для xls-файлов и открывает в ней workbook

@@ -12,8 +12,11 @@ def workbook_create():
     return wb
 
 def sheet_create(wb, main_sheet_name):
-    wb.create_sheet( main_sheet_name )
-    ws = wb.active
+    ws = wb.create_sheet( main_sheet_name )
+    for i in range(len(wb.sheetnames)):
+        if wb.sheetnames[i] == 'charlie':
+            break
+    wb.active = i
 
     return ws
 
