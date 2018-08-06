@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import datetime
 from enum import Enum
 from collections import namedtuple
@@ -11,10 +12,12 @@ from openpyxl.styles.protection import Protection
 from .xlslabel import *
 from .xlstableheader import *
 from .xlstable import *
-# from .sqltabledata import *
 from .xlsutils import *
 from .systemutils import *
 from .xlsutils_apply import *
+
+if sys.platform.startswith('win'):
+    from .sqltabledata import *
 
 PrintSetupStruct = namedtuple('PrintSetupStruct', 'orientation pages_width')
 
