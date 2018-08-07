@@ -16,9 +16,6 @@ from .xlsutils import *
 from .systemutils import *
 from .xlsutils_apply import *
 
-if sys.platform.startswith('win'):
-    from .sqltabledata import *
-
 PrintSetupStruct = namedtuple('PrintSetupStruct', 'orientation pages_width')
 
 class PrintSetup(Enum):
