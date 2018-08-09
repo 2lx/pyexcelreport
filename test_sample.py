@@ -154,48 +154,79 @@ cur_row = rep.print_label(XLSLabel('Базовая таблица данных',
 cur_row = rep.print_table(table, first_row=cur_row)
 
 """ Таблица поддерживает объединение ячеек по вертикали. Задается это через иерархию полей, которая
-по сути должна совпадать с сортировкой данных в таблице. Пример объединения ниже"""
+по сути должна совпадать с сортировкой данных в таблице. Пример объединения ниже
+"""
 
-table2 = copy(table)
+table2 = XLSTable(table_info, table_data, row_height=20)
 table2.hierarchy_append('ArticleGlobalCode', merging=True)
 table2.hierarchy_append('OItemColorName', merging=True)
+
 cur_row += 1
 cur_row = rep.print_label(XLSLabel('Объединяем одинаковые значения столбцов по вертикали', LabelHeading.h3),
                           first_row=cur_row, col_count=max_col)
 cur_row = rep.print_table(table2, first_row=cur_row)
 
+""" Можно скрыть столбцы, для которых выполнилось условие скрытия для каждого значения поля.
+Пример - добавим условие для столбцов Sum1 - Sum4
 """
-# указываю столбцы, которые можно скрыть если все значения в контексте нулевые
-fn = lambda x: x == 0
-for i in range(1, 14):
-    table.add_hide_column_condition("Sum{0:d}".format(i), fn)
 
-# определяю функции для отрисовки подзаголовков таблицы
+table3 = XLSTable(table_info, table_data, row_height=20)
+
+fn = lambda x: x == 0
+for i in range(1, 5):
+    table3.add_hide_column_condition("Sum{0:d}".format(i), fn)
+
+# не применяю, т.к. подействует на весь отчёт
+#  cur_row += 1
+#  cur_row = rep.print_label(XLSLabel('Скрою значение столбцов', LabelHeading.h3),
+#                            first_row=cur_row, col_count=max_col)
+#  cur_row = rep.print_table(table3, first_row=cur_row)
+
+
+""" Определяю функции для отрисовки подзаголовков таблицы
+"""
 def my_header_func(ws, row_data, cur_row, first_col):
     # в функции подзаголовка можно рисовать как обычно, и в том числе вызывать методы report
-    colheaders = [ THC("р. {0:d}".format(i)) for i in range(1, 14) ]
+    colheaders = [ THC("р. {0:d}".format(i)) for i in range(1, 5) ]
     my_subtitle_header = XLSTableHeader( columns=[
             THC('Составной подзаголовок модели', struct=colheaders)],
             row_height=16 )
 
-    cur_row = rep.print_tableheader(my_subtitle_header, first_row=cur_row + 1, first_col=first_col + 2)
+    cur_row = rep.print_tableheader(my_subtitle_header, first_row=cur_row, first_col=first_col + 3)
     return cur_row
 
-def my_second_header(ws, row_data, cur_row, first_col):
-    # просто вывожу надпись
-    return rep.print_label(XLSLabel('Подзаголовок цветомодели', LabelHeading.h3),
-                          first_row=cur_row, first_col=first_col + 2, col_count=13)
+table4 = XLSTable(table_info, table_data, row_height=20)
 
-# указываю поля, которые участвуют в группировках равных значений,
+# указываю поля, которые участвуют в группировках равных значений в порядке приоритета
+table4.hierarchy_append('ArticleGlobalCode', subtitle=my_header_func)
+
+cur_row += 1
+cur_row = rep.print_label(XLSLabel('Таблица с подзаголовками', LabelHeading.h3),
+                          first_row=cur_row, col_count=max_col)
+cur_row = rep.print_table(table4, first_row=cur_row)
+
+""" Подитоги таблицы
+"""
+table5 = XLSTable(table_info, table_data, row_height=20)
+
 # указываю поля с подитогами, указываю поля с подзаголовками
-# всё это указываю в порядке приоритета
-table.hierarchy_append('ArticleGlobalCode', merging=True,
+table5.hierarchy_append('ArticleGlobalCode',
+        subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4'])
+table5.hierarchy_append('OItemColorName',
+        subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4'])
+
+cur_row += 1
+cur_row = rep.print_label(XLSLabel('Таблица с подитогами', LabelHeading.h3),
+                          first_row=cur_row, col_count=max_col)
+cur_row = rep.print_table(table5, first_row=cur_row)
+
+"""
+table4.hierarchy_append('ArticleGlobalCode', merging=True,
         subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'],
         subtitle=my_header_func)
-table.hierarchy_append('OItemColorName', merging=True,
+table4.hierarchy_append('OItemColorName', merging=True,
         subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'],
         subtitle=my_second_header)
-
 # печатаю таблицу в отчёт
 cur_row = rep.print_table(table, first_row=cur_row)
 """
