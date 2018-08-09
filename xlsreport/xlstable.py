@@ -111,16 +111,30 @@ class XLSTable:
                 self._fields[fieldname].last_value_row = cur_row
                 self._fields[fieldname].changed = False
 
-        def _merge_previous_rows(cur_row):
-            """объединяем ячейки с одинаковыми значениями
+        def _merge_previous_row(cur_row):
+            """объединяем ячейки с одинаковыми значениями, и те, что шириной более 1 столбца
             """
-            fields = [self._fields[fn] for fn in self._hierarchy if self._fields[fn].merging and self._fields[fn].changed]
+            #TODO: refactor
+            fields = [f for _, f in self._fields.items()
+                        if (not f.merging) and (f.xls_end - f.xls_start != 0)]
             for f in fields:
-                if (f.last_value_row is not None) and (f.last_value_row != cur_row - 1):
+                apply_range(ws, cur_row - 1, first_col + f.xls_start,
+                                cur_row - 1, first_col + f.xls_end, set_merge)
+                apply_range(ws, cur_row - 1, first_col + f.xls_start,
+                                cur_row - 1, first_col + f.xls_end, set_borders)
+
+            fields = [self._fields[fn] for fn in self._hierarchy if self._fields[fn].merging]
+            for f in fields:
+                if (f.changed) and (f.last_value_row is not None) and (f.last_value_row != cur_row - 1):
                     apply_range(ws, f.last_value_row, first_col + f.xls_start,
                                     cur_row - 1,      first_col + f.xls_end, set_merge)
                     apply_range(ws, f.last_value_row, first_col + f.xls_start,
-                                    cur_row - 1,      first_col + f.xls_start, set_borders)
+                                    cur_row - 1,      first_col + f.xls_end, set_borders)
+                elif f.xls_end - f.xls_start != 0:
+                    apply_range(ws, cur_row - 1, first_col + f.xls_start,
+                                    cur_row - 1, first_col + f.xls_end, set_merge)
+                    apply_range(ws, cur_row - 1, first_col + f.xls_start,
+                                    cur_row - 1, first_col + f.xls_end, set_borders)
 
         def _make_subtotals(cur_row):
             """делаем подитоги
@@ -186,7 +200,7 @@ class XLSTable:
             sys.stdout.flush()
 
             _before_line_processing(data_row)
-            _merge_previous_rows(cur_row)
+            _merge_previous_row(cur_row)
             cur_row = _make_subtotals(cur_row)
             cur_row = _make_headers(cur_row, data_row)
 
@@ -195,9 +209,9 @@ class XLSTable:
             for fieldname, f in self._fields.items():
                 if f.hidden: continue
 
-                if (f.xls_end != f.xls_start):
-                    apply_range(ws, cur_row, first_col + f.xls_start,
-                                    cur_row, first_col + f.xls_end, set_merge)
+                #  if (f.xls_end != f.xls_start):
+                #      apply_range(ws, cur_row, first_col + f.xls_start,
+                #                      cur_row, first_col + f.xls_end, set_merge)
 
                 # если печатаю числа, не выводить нулевые значения
                 if (f.format not in ['int', 'currency', '3digit']) or (data_row[f.findex] != 0):
@@ -231,7 +245,7 @@ class XLSTable:
         sys.stdout.write("\n")
 
         _before_line_processing(None)
-        _merge_previous_rows(cur_row)
+        _merge_previous_row(cur_row)
         cur_row = _make_subtotals(cur_row)
 
         # скрываем все колонки, для которых не выполнились условия
