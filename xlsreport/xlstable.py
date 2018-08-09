@@ -135,10 +135,14 @@ class XLSTable:
                     ws.row_dimensions[_row].height = 18
 
                     # если подитоги по невидимому столбцу, печатаем заголовок в первом столбце
+                    # TODO: refactor
                     _label_col = fchcol if not fch.hidden else 1
-                    ws.cell(row=_row, column=fchcol).value = "Σ '{0:s}'".format(str(fch.last_value))
-                    apply_cell(ws, _row, fchcol, set_alignment)
-                    apply_cell(ws, _row, fchcol, set_font, bold=True)
+                    if not fch.hidden and fch.xls_start != fch.xls_end:
+                        apply_range(ws, _row, first_col + fch.xls_start,
+                                        _row, first_col + fch.xls_end, set_merge)
+                    ws.cell(row=_row, column=_label_col).value = "Σ '{0:s}'".format(str(fch.last_value))
+                    apply_cell(ws, _row, _label_col, set_alignment)
+                    apply_cell(ws, _row, _label_col, set_font, bold=True)
 
                     for st in fch.subtotal:
                         f = self._fields[st]
