@@ -16,35 +16,69 @@ TF  = XLSTableField
 
 rep = XLSReport('Акт передачи образцов', print_setup=PrintSetup.PortraitW1)
 
-# задаю структуру шапки отчёта
-# есть возможность делать столбец шириной неск. столбцов excel, для этого список widths (а не одно значение)
-# поле widths служит также для установки ширины колонок на листе (устанавливается в ширине среднего символа)
-tableheader = XLSTableHeader( columns=(
+# Количество колонок в отчёте. Этот параметр рассчитывается автоматически при задании шапки отчёта,
+# это будет показано ниже. Чтобы не путаться зададим пока руками
+max_col = 8
+
+# добавляю информацию о времени и пользователе, сгенерировавшем отчёт
+# После отрисовки любого объекта, он возвращает номер след. пустой строки на листе - cur_row
+cur_row = rep.print_preamble(max_col)
+assert cur_row == 2
+
+# Самая простая функция - вывести строку в ячейку, либо в неск. объединенных ячеек в одной строке.
+# Будет использоваться разное форматирование от h1 до h5
+cur_row = rep.print_label(XLSLabel('Заголовок h1, шириной 16 столбцов', LabelHeading.h1),
+                          first_row=cur_row, col_count=max_col)
+cur_row = rep.print_label(XLSLabel('Заголовок h2, шириной 4 столбца от 3-го столбца', LabelHeading.h2),
+                          first_row=cur_row, first_col = 3, col_count=4)
+cur_row = rep.print_label(XLSLabel('Заголовок h3, шириной 16 столбцов', LabelHeading.h3),
+                          first_row=cur_row, col_count=max_col)
+cur_row = rep.print_label(XLSLabel('Заголовок h4, шириной 16 столбцов', LabelHeading.h4),
+                          first_row=cur_row, col_count=max_col)
+cur_row = rep.print_label(XLSLabel('Заголовок h5, шириной 16 столбцов', LabelHeading.h5),
+                          first_row=cur_row, col_count=max_col)
+
+# вывожу сразу 2 лейбла в строку (просто не обновляю cur_row)
+rep.print_label(XLSLabel('Левый лейбл', LabelHeading.h5),
+                          first_row=cur_row, col_count=4)
+cur_row = rep.print_label(XLSLabel('Правый', LabelHeading.h5),
+                          first_row=cur_row, first_col=5, col_count=max_col - 5 + 1)
+
+# Структура шапки отчёта
+# Каждый столбец листа Excel имеет свою ширину. Удобней задавать ее вместе с заголовком столбца,
+# т.к. структуры шапки таблицы может измениться.
+# Очевидно, что если на странице несколько шапок, то имеет смысл задавать ширину через самую
+# широкую либо через первую, у остальных шапку можно опускать.
+# Есть возможность делать столбец шириной несколько столбцов Excel, поэтому widths это список,
+# а не единичное значение.
+# Пример шапки таблицы 1. Указан также параметр Высоты строки шапки - 60
+tableheader1 = XLSTableHeader( columns=(
+        THC( 'Заголовок 1 шириной 20 символов',  widths=[20] ),
+        THC( 'Заголовок 2 из 2х столбцов шириной 30 и 15',  widths=[30, 15] ),
+        THC( 'Заголовок 3 из 4х столбцов шириной по 15', widths=[15]*4 ),
+        THC( 'Заголовок 4. Высота строки = 60',  widths=[20] ),
+        ), row_height=60 )
+
+# получаем информацию о количестве Excel-колонок в отчете
+# Чтобы не считать вручную колонки, по информации, заданной в шапке, можно кол-во посчитать
+max_col = tableheader1.column_count
+
+# Применим информацию из шапки таблицы о ширине столбцов листа Excel к листу
+rep.apply_column_widths(tableheader1)
+
+# печатаю шапку отчёта
+cur_row = rep.print_tableheader(tableheader1, first_row=cur_row)
+
+"""
+tableheader2 = XLSTableHeader( columns=(
         THC( 'Артикул',         widths=[20] ),
         THC( 'Цвет ШП/Global',  widths=[20] ),
         THC( 'Размеры, составной заголовок', struct=[ THC('р', widths=[ 7]) ]*13 ),
         THC( 'Номера коробок',  widths=[20] ),
         ) )
 
-# получаем информацию о количестве Excel-колонок в отчете
-max_col = tableheader.column_count
-# настраивать ширину столбцов листа можно через информацию в шапке таблицы (обычно это верхняя шапка)
-rep.apply_column_widths(tableheader)
 
-# добавляю информациюю о сгенерированном отчёте
-cur_row = rep.print_preamble(max_col)
 
-# добавляю заголовок отчёта
-cur_row = rep.print_label(XLSLabel('Заявка. Прибыла ТЕ такого то числа, а ещё прибыла Партия', LabelHeading.h1),
-                          first_row=cur_row, col_count=max_col)
-# вывожу доп. информационные поля
-rep.print_label(XLSLabel('От кого: склад "Распределение"', LabelHeading.h5),
-                          first_row=cur_row, col_count=6)
-cur_row = rep.print_label(XLSLabel('Кому: склад "ШП технологи"', LabelHeading.h5),
-                          first_row=cur_row, first_col=7, col_count=max_col - 7 + 1)
-
-# печатаю шапку отчёта
-cur_row = rep.print_tableheader(tableheader, first_row=cur_row)
 
 # задаю структуру контекста отчёта
 table_info = (\
@@ -112,6 +146,6 @@ table.hierarchy_append('OItemColorName', merging=True,
 
 # печатаю таблицу в отчёт
 cur_row = rep.print_table(table, first_row=cur_row)
-
+"""
 # открываю отчет в программе по умолчанию для .xls
 rep.launch_excel()
