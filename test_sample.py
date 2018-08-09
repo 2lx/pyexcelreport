@@ -135,7 +135,7 @@ table_info = (\
         )
 
 # указываю данные для контекста
-table_data = (
+table_data = [
     [ 'MSH05435', 'черный', 50, 0, 150, 100,  '1-50' ],
     [ 'MSH05435', 'черный', 50, 0, 150, 200, '31-50' ],
     [ 'MSH05436', 'белый',   0, 0, 150,   0,  'данные' ],
@@ -143,7 +143,7 @@ table_data = (
     [ 'MSH05437', 'черный',  0, 0, 150, 100,  '1-50' ],
     [ 'MSH05437', 'черный',  0, 0, 150, 100,  '1-50' ],
     [ 'MSH05437', 'красный',50, 0, 150, 100,  'r0' ],
-    [ 'MSH05437', 'желтый', 50, 0, 150, 200,  '1-50' ] )
+    [ 'MSH05437', 'желтый', 50, 0, 150, 200,  '1-50' ] ]
 
 table = XLSTable(table_info, table_data, row_height=20)
 
@@ -234,9 +234,28 @@ cur_row = rep.print_label(XLSLabel('Таблица всё вместе', LabelHe
                           first_row=cur_row, col_count=max_col)
 cur_row = rep.print_table(table6, first_row=cur_row)
 
-""" На основании данных таблицы также можно рассчитать таблицу итогов
-Ниже пример итогов по первому столбцу
+""" На основании данных таблицы также можно рассчитать таблицу итогов. Нужно указать упорядоченный
+список полей, по которым будет группировка и сортировка, а также список полей, по которым будут
+рассчитываться суммы. Ниже пример итогов по первому столбцу
 """
+
+table_total_info = (\
+        TF('ArticleGlobalCode',    'string', 1),
+        TF('Sum1',                 'int',    1),
+        TF('Sum2',                 'int',    1),
+        TF('Sum3',                 'int',    1),
+        TF('Sum4',                 'int',    1),
+        )
+
+table_total_data = table.group_by_data(table_total_info,
+        hierarchy=['ArticleGlobalCode'],
+        sums=['Sum1', 'Sum2', 'Sum3', 'Sum4'])
+table_total = XLSTable(table_total_info, table_total_data, row_height=24)
+
+cur_row += 1
+cur_row = rep.print_label(XLSLabel('Итоги по таблице', LabelHeading.h3),
+                          first_row=cur_row, first_col=3, col_count=5)
+cur_row = rep.print_table(table_total, first_row=cur_row, first_col = 3)
 
 # открываю отчет в программе по умолчанию для .xls
 rep.launch_excel()
