@@ -191,7 +191,7 @@ class XLSTable:
             for fieldname, f in self._fields.items():
                 if f.hidden: continue
 
-                if (f.xls_start - f.xls_end > 1):
+                if (f.xls_end != f.xls_start):
                     apply_range(ws, cur_row, first_col + f.xls_start,
                                     cur_row, first_col + f.xls_end, set_merge)
 
