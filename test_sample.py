@@ -220,15 +220,23 @@ cur_row = rep.print_label(XLSLabel('Таблица с подитогами', Lab
                           first_row=cur_row, col_count=max_col)
 cur_row = rep.print_table(table5, first_row=cur_row)
 
+""" Теперь всё вместе
 """
-table4.hierarchy_append('ArticleGlobalCode', merging=True,
-        subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'],
-        subtitle=my_header_func)
-table4.hierarchy_append('OItemColorName', merging=True,
-        subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4', 'Sum5', 'Sum6', 'Sum7', 'Sum8', 'Sum9', 'Sum10', 'Sum11', 'Sum12', 'Sum13'],
-        subtitle=my_second_header)
-# печатаю таблицу в отчёт
-cur_row = rep.print_table(table, first_row=cur_row)
+table6 = XLSTable(table_info, table_data, row_height=20)
+
+table6.hierarchy_append('ArticleGlobalCode', merging=True, subtitle=my_header_func,
+        subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4'])
+table6.hierarchy_append('OItemColorName',
+        subtotal=['Sum1', 'Sum2', 'Sum3', 'Sum4'])
+
+cur_row += 1
+cur_row = rep.print_label(XLSLabel('Таблица всё вместе', LabelHeading.h3),
+                          first_row=cur_row, col_count=max_col)
+cur_row = rep.print_table(table6, first_row=cur_row)
+
+""" На основании данных таблицы также можно рассчитать таблицу итогов
+Ниже пример итогов по первому столбцу
 """
+
 # открываю отчет в программе по умолчанию для .xls
 rep.launch_excel()
