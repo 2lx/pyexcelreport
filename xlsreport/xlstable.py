@@ -130,7 +130,7 @@ class XLSTable:
                                     cur_row - 1,      first_col + f.xls_end, set_merge)
                     apply_range(ws, f.last_value_row, first_col + f.xls_start,
                                     cur_row - 1,      first_col + f.xls_end, set_borders)
-                elif f.xls_end - f.xls_start != 0:
+                elif (f.changed) and (f.xls_end - f.xls_start != 0):
                     apply_range(ws, cur_row - 1, first_col + f.xls_start,
                                     cur_row - 1, first_col + f.xls_end, set_merge)
                     apply_range(ws, cur_row - 1, first_col + f.xls_start,
@@ -200,7 +200,8 @@ class XLSTable:
             sys.stdout.flush()
 
             _before_line_processing(data_row)
-            _merge_previous_row(cur_row)
+            if cur_row > first_row:
+                _merge_previous_row(cur_row)
             cur_row = _make_subtotals(cur_row)
             cur_row = _make_headers(cur_row, data_row)
 
