@@ -14,6 +14,10 @@ from xlsreport import *
 THC = XLSTableHeaderColumn
 TF  = XLSTableField
 
+"""Создаем объект - книгу Excel. В нем будет 1 лист с переданным названием (не более 32 символов и
+не всех). Сразу задаются параметры печати портрет или ландшафт и кол-во страниц в ширину. Типы
+параметров печати можно посмотреть в xlsreport
+"""
 rep = XLSReport('Акт передачи образцов', print_setup=PrintSetup.PortraitW1)
 
 # Количество колонок в отчёте. Этот параметр рассчитывается автоматически при задании шапки отчёта,
@@ -26,7 +30,7 @@ cur_row = rep.print_preamble(max_col)
 assert cur_row == 2
 
 # Самая простая функция - вывести строку в ячейку, либо в неск. объединенных ячеек в одной строке.
-# Будет использоваться разное форматирование от h1 до h5
+# Выводим все виды форматирования от h1 до h5
 cur_row = rep.print_label(XLSLabel('Заголовок h1, шириной 16 столбцов', LabelHeading.h1),
                           first_row=cur_row, col_count=max_col)
 cur_row = rep.print_label(XLSLabel('Заголовок h2, шириной 4 столбца от 3-го столбца', LabelHeading.h2),
@@ -44,13 +48,14 @@ rep.print_label(XLSLabel('Левый лейбл', LabelHeading.h5),
 cur_row = rep.print_label(XLSLabel('Правый', LabelHeading.h5),
                           first_row=cur_row, first_col=5, col_count=max_col - 5 + 1)
 
-# Структура шапки отчёта
-# Каждый столбец листа Excel имеет свою ширину. Удобней задавать ее вместе с заголовком столбца,
-# т.к. структуры шапки таблицы может измениться.
-# Очевидно, что если на странице несколько шапок, то имеет смысл задавать ширину через самую
-# широкую либо через первую, у остальных шапку можно опускать.
-# Есть возможность делать столбец шириной несколько столбцов Excel, поэтому widths это список,
-# а не единичное значение.
+"""Структура шапки отчёта
+Каждый столбец листа Excel имеет свою ширину. Удобней задавать ее вместе с заголовком столбца,
+т.к. структуры шапки таблицы может измениться.
+Очевидно, что если на странице несколько шапок, то имеет смысл задавать ширину через самую
+широкую либо через первую, у остальных шапку можно опускать.
+Есть возможность делать столбец шириной несколько столбцов Excel, поэтому widths это список,
+а не единичное значение.
+"""
 # Пример шапки таблицы 1. Указан также параметр Высоты строки шапки - 60
 tableheader1 = XLSTableHeader( columns=(
         THC( 'Заголовок 1 шириной 20 символов',  widths=[20] ),
@@ -59,7 +64,7 @@ tableheader1 = XLSTableHeader( columns=(
         THC( 'Заголовок 4. Высота строки = 60',  widths=[20] ),
         ), row_height=60 )
 
-# получаем информацию о количестве Excel-колонок в отчете
+# Получаем информацию о количестве Excel-колонок в отчете
 # Чтобы не считать вручную колонки, по информации, заданной в шапке, можно кол-во посчитать
 max_col = tableheader1.column_count
 
@@ -67,19 +72,43 @@ max_col = tableheader1.column_count
 rep.apply_column_widths(tableheader1)
 
 # печатаю шапку отчёта
+cur_row += 1
+cur_row = rep.print_label(XLSLabel('Пример простой шапки отчёта', LabelHeading.h3),
+                          first_row=cur_row, col_count=max_col)
 cur_row = rep.print_tableheader(tableheader1, first_row=cur_row)
 
+""" Теперь сделаем еще одну шапку, но посложнее - она уже будет состоять из 2х уровней.
+Каждый столбец - объект класса с псевдонимом THC, в котором возможно указать член-данные struct типа
+списка объектов THC. Параметр widths стоит указывать только у нижнего этажа (ширина колонки-заголовка
+равна сумме ширин подколонок)
 """
 tableheader2 = XLSTableHeader( columns=(
-        THC( 'Артикул',         widths=[20] ),
-        THC( 'Цвет ШП/Global',  widths=[20] ),
-        THC( 'Размеры, составной заголовок', struct=[ THC('р', widths=[ 7]) ]*13 ),
-        THC( 'Номера коробок',  widths=[20] ),
+        THC( 'Заголовок 1',  widths=[20] ),
+        THC( 'Заголовок 2',  widths=[30] ),
+        THC( 'Составной заголовок', struct=[ THC('Подзаголовок', widths=[ 7]) ]*5 ),
+        THC( 'Заголовок 4',  widths=[20] ),
         ) )
 
+# печатаю шапку отчёта
+cur_row += 1
+cur_row = rep.print_label(XLSLabel('Пример составной шапки отчёта', LabelHeading.h3),
+                          first_row=cur_row, col_count=max_col)
+cur_row = rep.print_tableheader(tableheader2, first_row=cur_row)
 
+# А что будет при разной составной вложенности?
+tableheader3 = XLSTableHeader( columns=(
+        THC( '1', struct=[THC('1.1'), THC('1.2', struct=[THC('1.2.1'), THC('1.2.2')])]),
+        THC( '2' ),
+        THC( '3', struct=[ THC('3.1'), THC(3.2) ]),
+        THC( '4', struct=[ THC('4.1', widths=[1, 1]) ] ), # если не применять apply_column_widths, важно только сколько чисел
+        ) )
 
+cur_row += 1
+cur_row = rep.print_label(XLSLabel('Пример составной сложной шапки отчёта', LabelHeading.h3),
+                          first_row=cur_row, col_count=max_col)
+cur_row = rep.print_tableheader(tableheader3, first_row=cur_row)
 
+"""
 # задаю структуру контекста отчёта
 table_info = (\
         TF('ArticleGlobalCode',    'string', 1),
