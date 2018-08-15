@@ -216,6 +216,9 @@ class XLSTable:
                 if self._calculate_fn:
                     self._calculate_fn(data_dict_row)
 
+                    for fn, f in data_dict_row.items():
+                        data_row[self._fields[fn].findex] = data_dict_row[fn]
+
                 for f in fields:
                     col = f.coloring(data_dict_row)
                     apply_range(ws, cur_row, first_col + f.xls_start,
@@ -244,8 +247,9 @@ class XLSTable:
                 #                      cur_row, first_col + f.xls_end, set_merge)
 
                 # если печатаю числа, не выводить нулевые значения
-                if (f.format not in ['int', 'currency', '3digit']) or (data_row[f.findex] != 0):
-                    ws.cell(row=cur_row, column=first_col + f.xls_start).value = data_row[f.findex]
+                if (f.format != 'empty'):
+                    if (f.format not in ['int', '1digit', 'currency', '3digit']) or (data_row[f.findex] != 0):
+                        ws.cell(row=cur_row, column=first_col + f.xls_start).value = data_row[f.findex]
 
                 # обновляем флаг hide_flag чтобы скрыть в конце неиспользуемые колонки
                 if (f.hide_condition is not None) and (not f.hide_condition(data_row[f.findex])):

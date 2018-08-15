@@ -49,9 +49,11 @@ class MSSql():
         table_data = []
 
         for row in cursor:
-            row_data = ()
+#            row_data = ()
+            row_data = []
             for ti in table_info:
-                row_data += (row[ti.fname],) if (ti.fname != '') and (not ti.fname.startswith('__')) else ('',)
+#                row_data += (row[ti.fname],) if (ti.fname != '') and (not ti.fname.startswith('__')) else ('',)
+                row_data.append( row[ti.fname] if (ti.fname != '') and (not ti.fname.startswith('__')) else '' )
             table_data.append(row_data)
 
         return table_data
