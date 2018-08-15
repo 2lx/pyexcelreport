@@ -22,7 +22,9 @@ class XLSTableField:
 
 FieldStruct = recordclass('FieldStruct', 'findex xls_start xls_end format hidden '
                                          'last_value last_value_row changed '
-                                         'hide_condition hide_flag merging subtitle subtitle_rowcount subtotal')
+                                         'hide_condition hide_flag '
+                                         'merging subtitle subtitle_rowcount subtotal '
+                                         'coloring')
 
 class XLSTable:
     """Класс, инкапсулирующий информацию и методы отображения данных таблицы
@@ -41,7 +43,8 @@ class XLSTable:
                         format=ci.format, hidden=ci.hidden,
                         last_value=None, last_value_row=None, changed=False,
                         hide_condition=None, hide_flag=None,
-                        merging=False, subtitle=None, subtitle_rowcount=0, subtotal=None)
+                        merging=False, subtitle=None, subtitle_rowcount=0, subtotal=None,
+                        coloring=None)
             findex += 1
             if not ci.hidden:
                 cindex += ci.ccount
@@ -51,10 +54,17 @@ class XLSTable:
         self._row_height = row_height
         self._col_count = sum([ci.ccount for ci in colinfo if not ci.hidden])
         self._row_count = len(data)
+        self._calculate_fn = None
 
     def add_hide_column_condition(self, fieldname, cond_func):
         self._fields[fieldname].hide_condition = cond_func
         self._fields[fieldname].hide_flag = True
+
+    def add_coloring(self, fieldname, col_func):
+        self._fields[fieldname].coloring = col_func
+
+    def set_calculating(self, calc_func):
+        self._calculate_fn = calc_func
 
     def hierarchy_append(self, fieldname, merging=False, subtitle=None, subtotal=None, subtitle_rowcount=0):
         self._hierarchy.append(fieldname)
@@ -183,6 +193,7 @@ class XLSTable:
             # ordering sensitive
             fields = [self._fields[fn] for fn in self._hierarchy if self._fields[fn].subtitle and self._fields[fn].changed]
 
+            #TODO: change base container type???
             if fields:
                 data_dict_row = dict()
                 for fn, f in self._fields.items():
@@ -193,12 +204,30 @@ class XLSTable:
 
             return cur_row
 
+        def _calculate_fields(cur_row, data_row):
+            fields = [f for f in self._fields.values() if f.coloring]
+
+            #TODO: change base container type???
+            if fields or self._calculate_fn:
+                data_dict_row = dict()
+                for fn, f in self._fields.items():
+                    data_dict_row[fn] = data_row[f.findex]
+
+                if self._calculate_fn:
+                    self._calculate_fn(data_dict_row)
+
+                for f in fields:
+                    col = f.coloring(data_dict_row)
+                    apply_range(ws, cur_row, first_col + f.xls_start,
+                            cur_row, first_col + f.xls_end, set_fill, color=col.value)
+
         cur_row = first_row
         data_row_number = 0
         for data_row in self._data:
             sys.stdout.write("\rИдёт форматирование таблицы {0:0=2d}%".format(data_row_number * 100 // self._row_count ))
             sys.stdout.flush()
 
+            _calculate_fields(cur_row, data_row)
             _before_line_processing(data_row)
             if cur_row > first_row:
                 _merge_previous_row(cur_row)
