@@ -262,8 +262,11 @@ class XLSTable:
                 if f.hidden: continue
 
                 xlr = get_xlrange(cur_row, first_col + f.xls_start, cur_row, first_col + f.xls_end)
-                if f.format in ['int', 'currency', '3digit']:
+                if f.format in ['int', 'currency', '1digit', '3digit']:
                     apply_xlrange(ws, xlr, set_alignment, horizontal='right')
+                    apply_xlrange(ws, xlr, set_format, format=f.format)
+                elif f.format in ['date']:
+                    apply_xlrange(ws, xlr, set_alignment)
                     apply_xlrange(ws, xlr, set_format, format=f.format)
                 else:
                     apply_xlrange(ws, xlr, set_alignment)

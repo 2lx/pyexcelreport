@@ -102,9 +102,10 @@ def set_format(ws, start_row, start_col, end_row, end_col,
     """
     """
     if format == 'int':         new_format = '# ### ### ###'
-    elif format == '1digit':  new_format   = '#,#0.0'
+    elif format == '1digit':    new_format = '#,#0.0'
     elif format == 'currency':  new_format = '#,##0.00'
     elif format == '3digit':    new_format = '#,###0.000'
+    elif format == 'date':      new_format = 'DD.MM.YYYY'
     else: return
 
     for r in range(start_row, end_row + 1):
