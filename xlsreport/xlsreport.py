@@ -29,7 +29,7 @@ class XLSReport():
     """Класс, инкапсулирующий в себе методы для создания отчета в Excel
     """
 
-    def __init__(self, sheet_name='Новый лист', print_setup=PrintSetup.LandscapeW1, protection=True):
+    def __init__(self, sheet_name='Новый лист', print_setup=PrintSetup.LandscapeW1, protection=False):
         """Конструктор, создает книгу с одним именованным листом, устанавливает параметры для печати
         """
         self._wb = workbook_create()
@@ -56,6 +56,11 @@ class XLSReport():
 
     def apply_column_widths(self, tableheader, first_col=1):
         tableheader.apply_widths(self._wb.active, first_col)
+
+    def fold_columns_group(self, col1, col2):
+        """Группирует колонки с возможностью скрытия, формат coli - latin uppercase
+        """
+        self._ws.column_dimensions.group(col1, col2, hidden=True)
 
     def print_preamble(self, max_col):
         self._ws.row_dimensions[1].height = 14
