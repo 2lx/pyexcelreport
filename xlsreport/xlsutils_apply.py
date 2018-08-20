@@ -97,6 +97,20 @@ def set_fill(ws, start_row, start_col, end_row, end_col,
         for c in range(start_col, end_col + 1):
             ws.cell(row=r, column=c).fill = new_fill
 
+def set_pattern_fill(ws, start_row, start_col, end_row, end_col,
+            bg_color='FFFFFF', fg_color='000000', pattern_type='none'):
+    """Fills the cell background with color
+    """
+    # Цвет фона - bg, а штрихов на нем - fg, но при заливке 'solid' - цвет фона fg.
+    if pattern_type == 'solid':
+        new_fill = PatternFill(bgColor=fg_color, fgColor=bg_color, patternType=pattern_type)
+    else:
+        new_fill = PatternFill(bgColor=bg_color, fgColor=fg_color, patternType=pattern_type)
+
+    for r in range(start_row, end_row + 1):
+        for c in range(start_col, end_col + 1):
+            ws.cell(row=r, column=c).fill = new_fill
+
 def set_format(ws, start_row, start_col, end_row, end_col,
             format=''):
     """
@@ -111,4 +125,3 @@ def set_format(ws, start_row, start_col, end_row, end_col,
     for r in range(start_row, end_row + 1):
         for c in range(start_col, end_col + 1):
             ws.cell(row=r, column=c).number_format = new_format
-

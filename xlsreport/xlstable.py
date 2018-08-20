@@ -24,7 +24,7 @@ FieldStruct = recordclass('FieldStruct', 'findex xls_start xls_end format hidden
                                          'last_value last_value_row changed '
                                          'hide_condition hide_flag '
                                          'merging subtitle subtitle_rowcount subtotal '
-                                         'coloring')
+                                         'color_fn pattern_fn')
 
 class XLSTable:
     """Класс, инкапсулирующий информацию и методы отображения данных таблицы
@@ -44,7 +44,7 @@ class XLSTable:
                         last_value=None, last_value_row=None, changed=False,
                         hide_condition=None, hide_flag=None,
                         merging=False, subtitle=None, subtitle_rowcount=0, subtotal=None,
-                        coloring=None)
+                        color_fn=None, pattern_fn=None)
             findex += 1
             if not ci.hidden:
                 cindex += ci.ccount
@@ -60,8 +60,11 @@ class XLSTable:
         self._fields[fieldname].hide_condition = cond_func
         self._fields[fieldname].hide_flag = True
 
-    def add_coloring(self, fieldname, col_func):
-        self._fields[fieldname].coloring = col_func
+    def add_coloring(self, fieldname, color_fn):
+        self._fields[fieldname].color_fn = color_fn
+
+    def add_pattern(self, fieldname, pattern_fn):
+        self._fields[fieldname].pattern_fn = pattern_fn
 
     def set_calculating(self, calc_func):
         self._calculate_fn = calc_func
@@ -204,11 +207,9 @@ class XLSTable:
 
             return cur_row
 
-        def _calculate_fields(cur_row, data_row):
-            fields = [f for f in self._fields.values() if f.coloring]
-
+        def _calculate_fields(data_row):
             #TODO: change base container type???
-            if fields or self._calculate_fn:
+            if self._calculate_fn:
                 data_dict_row = dict()
                 for fn, f in self._fields.items():
                     data_dict_row[fn] = data_row[f.findex]
@@ -219,10 +220,25 @@ class XLSTable:
                     for fn, f in data_dict_row.items():
                         data_row[self._fields[fn].findex] = data_dict_row[fn]
 
-                for f in fields:
-                    col = f.coloring(data_dict_row)
-                    apply_range(ws, cur_row, first_col + f.xls_start,
-                            cur_row, first_col + f.xls_end, set_fill, color=col.value)
+        def _coloring(cur_row, data_row):
+            #TODO: change base container type???
+            data_dict_row = dict()
+            for fn, f in self._fields.items():
+                data_dict_row[fn] = data_row[f.findex]
+
+            fields = [f for f in self._fields.values() if f.color_fn]
+            for f in fields:
+                col = f.color_fn(data_dict_row)
+                apply_range(ws, cur_row, first_col + f.xls_start,
+                                cur_row, first_col + f.xls_end,
+                                set_fill, color=col.value)
+
+            fields = [f for f in self._fields.values() if f.pattern_fn]
+            for f in fields:
+                (pattern, colbg, colfg) = f.pattern_fn(data_dict_row)
+                apply_range(ws, cur_row, first_col + f.xls_start,
+                                cur_row, first_col + f.xls_end,
+                                set_pattern_fill, bg_color=colbg.value, fg_color=colfg.value, pattern_type=pattern)
 
         cur_row = first_row
         data_row_number = 0
@@ -230,7 +246,8 @@ class XLSTable:
             sys.stdout.write("\rИдёт форматирование таблицы {0:0=2d}%".format(data_row_number * 100 // self._row_count ))
             sys.stdout.flush()
 
-            _calculate_fields(cur_row, data_row)
+            _calculate_fields(data_row)
+            _coloring(cur_row, data_row)
             _before_line_processing(data_row)
             if cur_row > first_row:
                 _merge_previous_row(cur_row)
