@@ -247,12 +247,12 @@ class XLSTable:
             sys.stdout.flush()
 
             _calculate_fields(data_row)
-            _coloring(cur_row, data_row)
             _before_line_processing(data_row)
             if cur_row > first_row:
                 _merge_previous_row(cur_row)
             cur_row = _make_subtotals(cur_row)
             cur_row = _make_headers(cur_row, data_row)
+            _coloring(cur_row, data_row)
 
             ws.row_dimensions[cur_row].height = self._row_height
 
