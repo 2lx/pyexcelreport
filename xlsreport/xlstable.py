@@ -13,12 +13,13 @@ from recordclass import recordclass
 class XLSTableField:
     """Структура для хранения информации одного столбца данных таблицы
     """
-    def __init__(self, fieldname, format='string', col_count=1, editable=False, hidden=False):
-        self.fname    = fieldname
-        self.ccount   = col_count
-        self.format   = format
-        self.editable = editable
-        self.hidden   = hidden
+    def __init__(self, fieldname, format='string', col_count=1, editable=False, hidden=False, default_value=None):
+        self.fname            = fieldname
+        self.ccount           = col_count
+        self.format           = format
+        self.editable         = editable
+        self.hidden           = hidden
+        self.default_value    = default_value
 
 FieldStruct = recordclass('FieldStruct', 'findex xls_start xls_end format hidden '
                                          'last_value last_value_row changed '
