@@ -18,7 +18,8 @@ def maybe_sqlquoted(param):
     elif type(param) == [datetime.date]:
         param = "'{0:s}'".format(param.strftime('%d/%m/%Y %H:%M:%S.%f'))
     elif isinstance(param, str):
-        param = "'{0:s}'".format(param)
+        if param != "NULL":
+            param = "'{0:s}'".format(param)
     return param
 
 
