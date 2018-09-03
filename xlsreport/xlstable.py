@@ -164,7 +164,7 @@ class XLSTable:
 
                     # если подитоги по невидимому столбцу, печатаем заголовок в первом столбце
                     # TODO: refactor
-                    _label_col = fchcol if not fch.hidden else 1
+                    _label_col = fchcol if not fch.hidden else first_col
                     if not fch.hidden and fch.xls_start != fch.xls_end:
                         apply_range(ws, _row, first_col + fch.xls_start,
                                         _row, first_col + fch.xls_end, set_merge)
@@ -181,11 +181,12 @@ class XLSTable:
                         formulae = "=SUBTOTAL(9,{0:s}{1:d}:{0:s}{2:d})".format(
                                 get_column_letter(fcol1), fch.last_value_row, cur_row - 1)
                         ws.cell(row=_row, column=fcol1).value = formulae
+                        apply_range(ws, _row, fcol1, _row, fcol2, set_merge)
 
-                        apply_cell(ws, _row, fcol1, set_alignment, horizontal='right')
-                        apply_cell(ws, _row, fcol1, set_format, format=f.format)
-                        apply_cell(ws, _row, fcol1, set_borders)
-                        apply_cell(ws, _row, fcol1, set_fill, color=Color.LT_GRAY.value)
+                        apply_range(ws, _row, fcol1, _row, fcol2, set_alignment, horizontal='right')
+                        apply_range(ws, _row, fcol1, _row, fcol2, set_format, format=f.format)
+                        apply_range(ws, _row, fcol1, _row, fcol2, set_borders)
+                        apply_range(ws, _row, fcol1, _row, fcol2, set_fill, color=Color.LT_GRAY.value)
 
                     for i in range(fch.last_value_row - fch.subtitle_rowcount, cur_row + stlines):
                         ws.row_dimensions[i].outlineLevel += 1
