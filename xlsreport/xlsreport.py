@@ -8,6 +8,7 @@ from enum import Enum
 from collections import namedtuple
 
 from openpyxl.styles.protection import Protection
+from openpyxl.utils import get_column_letter
 
 from .xlslabel import *
 from .xlstableheader import *
@@ -56,6 +57,9 @@ class XLSReport():
 
     def apply_column_widths(self, tableheader, first_col=1):
         tableheader.apply_widths(self._wb.active, first_col)
+
+    def get_column_letter(self, col):
+        return get_column_letter(col)
 
     def fold_columns_group(self, col1, col2):
         """Группирует колонки с возможностью скрытия, формат coli - latin uppercase

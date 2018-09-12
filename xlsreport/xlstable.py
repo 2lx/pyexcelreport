@@ -99,6 +99,9 @@ class XLSTable:
             table_total_data.append(tuple(data_row))
         return table_total_data
 
+    def get_column_xls_index_pair(self, fieldname):
+        return (self._fields[fieldname].xls_start, self._fields[fieldname].xls_end)
+
     def apply(self, ws, first_row, first_col):
         """Отображает непосредственно в XLS данные таблицы
         """
